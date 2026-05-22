@@ -1,0 +1,10 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "deped-finance-frontend",
+    "compatibility_date": "2026-05-22",
+    "pages_build_output_dir": "dist",
+    "vars": {
+        "VITE_API_URL": "https://backend-1-7zxj.onrender.com/api",
+        "VITE_VERIFICATION_CODE": "6registration9"
+    }
+}

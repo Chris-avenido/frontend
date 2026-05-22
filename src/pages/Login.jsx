@@ -13,16 +13,18 @@ const Login = () => {
   // Login State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginMethod, setLoginMethod] = useState('password');
 
   // Registration State
   const [regData, setRegData] = useState({
-    first_name: '', last_name: '', email: '', password: '', 
-    contact_number: '', region: '', division: '', province: '', 
-    city: '', barangay: '', office: '', position: '', 
+    first_name: '', last_name: '', email: '', password: '', confirm_password: '',
+    contact_number: '', region: 'NCR', division: '', province: '', 
+    city: '', barangay: '', office: 'finance', position: '', 
     account_category: '', passcode: '', verification_code: ''
   });
 
   // UI State
+  const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
@@ -57,7 +59,7 @@ const Login = () => {
       });
 
       try {
-        const response = await api.post('/users/login', { email, password });
+        const response = await api.post('/users/login', { email, password, loginMethod });
         localStorage.setItem('expiryTime', expiryTime);
         localStorage.setItem('user', response.data.user.uid);
         localStorage.setItem('role', response.data.user.role);
@@ -85,12 +87,34 @@ const Login = () => {
         setIsLoading(false);
       }
     } else {
-      const { first_name, last_name, email: regEmail, password: regPassword, verification_code } = regData;
+      if (currentStep < 4) return;
+      
+      const { first_name, last_name, email: regEmail, password: regPassword, confirm_password, verification_code } = regData;
       if (!first_name || !last_name || !regEmail || !regPassword || !verification_code) {
         return Swal.fire({
           icon: 'warning',
           title: 'Missing Required Fields',
           text: 'Please complete all required fields (Name, Email, Password, Verification Code).',
+          confirmButtonColor: '#0B3A68',
+          customClass: { popup: 'rounded-2xl shadow-2xl' }
+        });
+      }
+
+      if (verification_code !== (import.meta.env.VITE_VERIFICATION_CODE || '6registration9')) {
+        return Swal.fire({
+          icon: 'error',
+          title: 'Invalid Verification Code',
+          text: 'The admin verification code is incorrect.',
+          confirmButtonColor: '#D31F35',
+          customClass: { popup: 'rounded-2xl shadow-2xl' }
+        });
+      }
+
+      if (regPassword !== confirm_password) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Password Mismatch',
+          text: 'Password and Confirm Password must match.',
           confirmButtonColor: '#0B3A68',
           customClass: { popup: 'rounded-2xl shadow-2xl' }
         });
@@ -132,14 +156,51 @@ const Login = () => {
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
+    setCurrentStep(1);
     setEmail('');
     setPassword('');
     setRegData({
-      first_name: '', last_name: '', email: '', password: '', 
-      contact_number: '', region: '', division: '', province: '', 
-      city: '', barangay: '', office: '', position: '', 
+      first_name: '', last_name: '', email: '', password: '', confirm_password: '',
+      contact_number: '', region: 'NCR', division: '', province: '', 
+      city: '', barangay: '', office: 'finance', position: '', 
       account_category: '', passcode: '', verification_code: ''
     });
+  };
+
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const renderSelect = (id, label, value, onChange, icon, options, isReg = false) => {
+    const Icon = icon;
+    return (
+      <div className="space-y-1.5 w-full">
+        <label htmlFor={id} className="block text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+          {label}
+        </label>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
+            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[#0B3A68]' : 'text-slate-400'}`} />
+          </div>
+          <select
+            id={id}
+            name={isReg ? id : undefined}
+            value={value}
+            onChange={onChange}
+            onFocus={() => setFocusedField(id)}
+            onBlur={() => setFocusedField(null)}
+            className="block w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] text-sm text-slate-800 font-medium transition-all duration-300 outline-none shadow-sm hover:border-slate-300 appearance-none"
+          >
+            <option value="" disabled>Select {label}</option>
+            {options.map((opt, idx) => (
+              <option key={idx} value={opt}>{opt}</option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderInput = (id, label, type, value, onChange, icon, placeholder, isReg = false) => {
@@ -247,7 +308,16 @@ const Login = () => {
                 {isLogin ? (
                   <>
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
-                    {renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '••••••••')}
+                    {loginMethod === 'password' 
+                      ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '••••••••')
+                      : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value), KeyRound, '123456')}
+                    
+                    <div className="flex justify-end mt-1">
+                      <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="text-xs font-bold text-[#0B3A68] hover:text-blue-700">
+                        {loginMethod === 'password' ? 'Login via Passcode instead' : 'Login via Password instead'}
+                      </button>
+                    </div>
+
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center group cursor-pointer">
                         <div className="relative flex items-center justify-center w-4 h-4 mr-2">
@@ -263,41 +333,81 @@ const Login = () => {
                   </>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
-                      <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Personal Information</h3>
-                    </div>
-                    {renderInput('first_name', 'First Name', 'text', regData.first_name, handleRegChange, User, 'Juan', true)}
-                    {renderInput('last_name', 'Last Name', 'text', regData.last_name, handleRegChange, User, 'Dela Cruz', true)}
-                    {renderInput('email', 'Email Address', 'email', regData.email, handleRegChange, Mail, 'juan@deped.gov.ph', true)}
-                    {renderInput('contact_number', 'Contact Number', 'text', regData.contact_number, handleRegChange, Phone, '09123456789', true)}
+                    {currentStep === 1 && (
+                      <>
+                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 1: Personal Information</h3>
+                        </div>
+                        {renderInput('first_name', 'First Name', 'text', regData.first_name, handleRegChange, User, 'Juan', true)}
+                        {renderInput('last_name', 'Last Name', 'text', regData.last_name, handleRegChange, User, 'Dela Cruz', true)}
+                        {renderInput('email', 'Email Address', 'email', regData.email, handleRegChange, Mail, 'juan@deped.gov.ph', true)}
+                        {renderInput('contact_number', 'Contact Number', 'text', regData.contact_number, handleRegChange, Phone, '09123456789', true)}
+                      </>
+                    )}
                     
-                    <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mt-4 mb-2">
-                      <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Location & Assignment</h3>
-                    </div>
-                    {renderInput('region', 'Region', 'text', regData.region, handleRegChange, MapPin, 'NCR', true)}
-                    {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'Manila', true)}
-                    {renderInput('province', 'Province', 'text', regData.province, handleRegChange, MapPin, 'Metro Manila', true)}
-                    {renderInput('city', 'City/Municipality', 'text', regData.city, handleRegChange, MapPin, 'Manila City', true)}
-                    {renderInput('barangay', 'Barangay', 'text', regData.barangay, handleRegChange, MapPin, 'Brgy 1', true)}
-                    
-                    <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mt-4 mb-2">
-                      <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Role & Security</h3>
-                    </div>
-                    {renderInput('office', 'Office', 'text', regData.office, handleRegChange, Building2, 'Finance Division', true)}
-                    {renderInput('position', 'Position', 'text', regData.position, handleRegChange, Briefcase, 'Accountant I', true)}
-                    {renderInput('account_category', 'Account Category', 'text', regData.account_category, handleRegChange, Hash, 'Regular', true)}
-                    {renderInput('password', 'Password', 'password', regData.password, handleRegChange, Lock, '••••••••', true)}
-                    {renderInput('passcode', '6-Digit Passcode', 'password', regData.passcode, handleRegChange, KeyRound, '123456', true)}
-                    {renderInput('verification_code', 'Admin Verification Code', 'text', regData.verification_code, handleRegChange, ShieldCheck, 'Enter Code', true)}
+                    {currentStep === 2 && (
+                      <>
+                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 2: Location</h3>
+                        </div>
+                        {renderSelect('region', 'Region', regData.region, handleRegChange, MapPin, ['NCR'], true)}
+                        {renderSelect('division', 'Division', regData.division, handleRegChange, Building2, ['Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig'], true)}
+                        {renderSelect('province', 'Province', regData.province, handleRegChange, MapPin, ['Metro Manila'], true)}
+                        {renderSelect('city', 'City/Municipality', regData.city, handleRegChange, MapPin, ['Manila City', 'Quezon City', 'Makati City', 'Taguig City', 'Pasig City'], true)}
+                      </>
+                    )}
+
+                    {currentStep === 3 && (
+                      <>
+                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 3: Role & Assignment</h3>
+                        </div>
+                        {renderSelect('barangay', 'Barangay', regData.barangay, handleRegChange, MapPin, ['Barangay 1', 'Barangay 2', 'Barangay 3'], true)}
+                        {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['finance'], true)}
+                        {renderSelect('position', 'Position', regData.position, handleRegChange, Briefcase, ['Accountant I', 'Accountant II', 'Accountant III', 'Admin Officer'], true)}
+                        {renderInput('account_category', 'Account Category', 'text', regData.account_category, handleRegChange, Hash, 'Regular', true)}
+                      </>
+                    )}
+
+                    {currentStep === 4 && (
+                      <>
+                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 4: Security</h3>
+                        </div>
+                        {renderInput('password', 'Password', 'password', regData.password, handleRegChange, Lock, '••••••••', true)}
+                        {renderInput('confirm_password', 'Confirm Password', 'password', regData.confirm_password, handleRegChange, Lock, '••••••••', true)}
+                        {renderInput('passcode', '6-Digit Passcode', 'password', regData.passcode, handleRegChange, KeyRound, '123456', true)}
+                        {renderInput('verification_code', 'Admin Verification Code', 'text', regData.verification_code, handleRegChange, ShieldCheck, 'Enter Code', true)}
+                      </>
+                    )}
                   </div>
                 )}
 
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
-                  <button type="submit" disabled={isLoading} className="group w-full flex items-center justify-center gap-2 py-4 px-4 border border-transparent rounded-xl shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)] text-sm font-bold text-white bg-gradient-to-r from-[#0B3A68] to-[#092a4a] hover:shadow-[0_12px_20px_-8px_rgba(11,58,104,0.4)] hover:to-[#0B3A68] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3A68] transition-all duration-300 overflow-hidden relative">
-                    <span className="relative z-10">{isLogin ? 'Secure Authentication' : 'Submit Registration'}</span>
-                    <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-                    <div className="absolute inset-0 h-full w-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
-                  </button>
+                  {isLogin ? (
+                    <button type="submit" disabled={isLoading} className="group w-full flex items-center justify-center gap-2 py-4 px-4 border border-transparent rounded-xl shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)] text-sm font-bold text-white bg-gradient-to-r from-[#0B3A68] to-[#092a4a] hover:shadow-[0_12px_20px_-8px_rgba(11,58,104,0.4)] hover:to-[#0B3A68] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3A68] transition-all duration-300 overflow-hidden relative">
+                      <span className="relative z-10">Secure Authentication</span>
+                      <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                      <div className="absolute inset-0 h-full w-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                    </button>
+                  ) : (
+                    <div className="flex gap-3">
+                      {currentStep > 1 && (
+                        <button type="button" onClick={prevStep} className="flex-1 py-4 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-colors">
+                          Back
+                        </button>
+                      )}
+                      {currentStep < 4 ? (
+                        <button type="button" onClick={nextStep} className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors flex items-center justify-center gap-2">
+                          Next <ChevronRight className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button type="submit" disabled={isLoading} className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)]">
+                          Submit Registration
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               </form>
 

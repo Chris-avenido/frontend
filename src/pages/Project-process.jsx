@@ -22,6 +22,9 @@ const ProjectProcess = () => {
     // Status Counts State
     const [statusCounts, setStatusCounts] = useState({ total: 0, ongoing: 0, completed: 0, not_started: 0 });
 
+    // Modal State
+    const [selectedProject, setSelectedProject] = useState(null);
+
     // Fetch Data Function
     const fetchProjects = async (currentPage, search, status, school, reg, div) => {
         setIsLoading(true);
@@ -196,7 +199,8 @@ const ProjectProcess = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ duration: 0.4, delay: index * 0.05 }}
                                     whileHover={{ y: -6 }}
-                                    className="group relative bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between overflow-hidden"
+                                    onClick={() => setSelectedProject(project)}
+                                    className="group relative bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between overflow-hidden cursor-pointer"
                                 >
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400 to-[#0B3A68] opacity-0 rounded-full blur-3xl -mr-10 -mt-10 transition-all duration-700 group-hover:opacity-10 group-hover:scale-150 pointer-events-none"></div>
 
@@ -317,6 +321,58 @@ const ProjectProcess = () => {
                         </div>
                     </motion.div>
                 )}
+
+                {/* Project Details Modal */}
+                <AnimatePresence>
+                    {selectedProject && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                onClick={() => setSelectedProject(null)}
+                                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg bg-white rounded-3xl shadow-2xl z-50 overflow-hidden"
+                            >
+                                <div className="p-6 border-b border-slate-100 flex justify-between items-start">
+                                    <div>
+                                        <h3 className="text-xl font-extrabold text-[#0B3A68] mb-1">{selectedProject.project_name || 'Unnamed Project'}</h3>
+                                        <p className="text-sm text-slate-500 font-medium">Project ID: {selectedProject.project_id}</p>
+                                    </div>
+                                    <button onClick={() => setSelectedProject(null)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+                                <div className="p-6 space-y-4 bg-slate-50">
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                                        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Tranche Disbursements</h4>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Tranche 1</label>
+                                            <input type="number" placeholder="Enter amount" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B3A68] focus:border-[#0B3A68] outline-none text-sm font-medium text-slate-800" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Tranche 2</label>
+                                            <input type="number" placeholder="Enter amount" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B3A68] focus:border-[#0B3A68] outline-none text-sm font-medium text-slate-800" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Tranche 3</label>
+                                            <input type="number" placeholder="Enter amount" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0B3A68] focus:border-[#0B3A68] outline-none text-sm font-medium text-slate-800" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6 border-t border-slate-100 bg-white flex justify-end">
+                                    <button onClick={() => setSelectedProject(null)} className="px-6 py-2.5 bg-[#0B3A68] hover:bg-[#092a4a] text-white font-bold rounded-xl transition-colors">
+                                        Close
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
+
             </main>
             <style dangerouslySetInnerHTML={{
                 __html: `

@@ -1,4 +1,7 @@
-const BASE_URL = 'http://localhost:5000/api';
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5174';
+export const BASE_URL = isLocalhost
+  ? 'http://localhost:5000/api'
+  : 'https://backend-1-7zxj.onrender.com/api';
 
 /**
  * Reusable HTTP client for interacting with the backend API.
@@ -9,7 +12,7 @@ const api = {
    */
   request: async (endpoint, options = {}) => {
     const url = `${BASE_URL}${endpoint}`;
-    
+
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -20,13 +23,13 @@ const api = {
         ...options,
         headers,
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'API request failed');
       }
-      
+
       return data;
     } catch (error) {
       console.error(`[API Error] ${endpoint}:`, error.message);
@@ -42,9 +45,9 @@ const api = {
   /**
    * POST request
    */
-  post: (endpoint, body) => api.request(endpoint, { 
-    method: 'POST', 
-    body: JSON.stringify(body) 
+  post: (endpoint, body) => api.request(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(body)
   }),
 };
 

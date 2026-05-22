@@ -22,6 +22,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [totalProject, setTotalProject] = useState(0);
+  const [totalBudget, setTotalBudget] = useState(0);
   const [tranche1, setTranche1] = useState(0);
   const [tranche2, setTranche2] = useState(0);
   const [tranche3, setTranche3] = useState(0);
@@ -48,6 +49,7 @@ const Home = () => {
         const response = await api.get('/projects/all-projects');
         const summary = response.data.summary;
         setTotalProject(Number(summary.total_project || 0));
+        setTotalBudget(Number(summary.approved_budget_for_contract || 0));
 
         // Mock data logic for demonstration, replace with DB later
         setTranche1(10000);
@@ -119,8 +121,10 @@ const Home = () => {
           </div>
         </div>
         <div className="relative z-10">
-          <p className="text-4xl font-extrabold text-slate-800 tracking-tight">
-            {value.toLocaleString()}
+          <p className="text-3xl lg:text-4xl font-extrabold text-slate-800 tracking-tight truncate">
+            {typeof value === 'number' && title.includes('Budget') 
+              ? new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value)
+              : value.toLocaleString()}
           </p>
         </div>
       </motion.div>
@@ -149,11 +153,12 @@ const Home = () => {
           </header>
 
           {/* STATS CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <StatCard title="Total Projects" value={totalProject} icon={Briefcase} color="from-sky-400 to-blue-600" delay={0.1} loading={isLoading} />
-            <StatCard title="Tranche 1" value={tranche1} icon={Activity} color="from-amber-400 to-orange-500" delay={0.2} loading={isLoading} />
-            <StatCard title="Tranche 2" value={tranche2} icon={CreditCard} color="from-rose-400 to-red-600" delay={0.3} loading={isLoading} />
-            <StatCard title="Tranche 3" value={tranche3} icon={Wallet} color="from-violet-400 to-purple-600" delay={0.4} loading={isLoading} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+            <StatCard title="Total Budget" value={totalBudget} icon={Wallet} color="from-emerald-400 to-green-600" delay={0.1} loading={isLoading} />
+            <StatCard title="Total Projects" value={totalProject} icon={Briefcase} color="from-sky-400 to-blue-600" delay={0.2} loading={isLoading} />
+            <StatCard title="Tranche 1" value={tranche1} icon={Activity} color="from-amber-400 to-orange-500" delay={0.3} loading={isLoading} />
+            <StatCard title="Tranche 2" value={tranche2} icon={CreditCard} color="from-rose-400 to-red-600" delay={0.4} loading={isLoading} />
+            <StatCard title="Tranche 3" value={tranche3} icon={Wallet} color="from-violet-400 to-purple-600" delay={0.5} loading={isLoading} />
           </div>
 
           {/* CHARTS */}

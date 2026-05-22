@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Shield, Bell, Moon, HelpCircle, LogOut, ChevronRight, ArrowLeft, Mail, Phone, MapPin, Briefcase, Edit2, Check, X, KeyRound, Eye, EyeOff, Delete } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import insightEdLogo from '../assets/InsightEd1.png';
-
+import { BASE_URL } from '../utils/api';
 const items = [
     ['Personal Info', 'Manage account details', User, 'blue'],
     ['Security', 'Privacy & passcode', Shield, 'green'],
@@ -145,7 +145,7 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                 delete payload.contact_number;
             }
 
-            const res = await fetch(`http://localhost:5000/api/users/${user.uid}`, {
+            const res = await fetch(`${BASE_URL}/users/${user.uid}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -394,7 +394,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/users/${userId}`);
+                const res = await fetch(`${BASE_URL}/users/${userId}`);
                 const data = await res.json();
                 setUser(data?.data || data);
             } catch (error) {
@@ -415,7 +415,7 @@ const Profile = () => {
         setVerifyingLogout(true);
         setLogoutError('');
         try {
-            const res = await fetch(`http://localhost:5000/api/users/${userId}/verify-passcode`, {
+            const res = await fetch(`${BASE_URL}/users/${userId}/verify-passcode`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ passcode })
