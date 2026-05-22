@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ChevronRight, User, MapPin, Building2, Briefcase, Phone, Hash, KeyRound } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../utils/api';
 import logo from '../assets/InsightEd1.png';
+import {
+  getBarangaysByCityMunicipality,
+  getCitiesMunicipalitiesByProvince,
+  getCitiesMunicipalitiesByRegion,
+  getProvincesByRegion,
+  getRegions
+} from '../utils/philippinesAddress';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,10 +25,17 @@ const Login = () => {
   // Registration State
   const [regData, setRegData] = useState({
     first_name: '', last_name: '', email: '', password: '', confirm_password: '',
-    contact_number: '', region: 'NCR', division: '', province: '', 
+    contact_number: '', region: '', division: '', province: '',
     city: '', barangay: '', office: 'finance', position: '', 
     account_category: '', passcode: '', verification_code: ''
   });
+  const [addressCodes, setAddressCodes] = useState({
+    region: '', province: '', city: '', barangay: ''
+  });
+  const [addressOptions, setAddressOptions] = useState({
+    regions: [], provinces: [], cities: [], barangays: []
+  });
+  const [isAddressLoading, setIsAddressLoading] = useState(false);
 
   // UI State
   const [currentStep, setCurrentStep] = useState(1);
@@ -33,6 +47,120 @@ const Login = () => {
 
   const handleRegChange = (e) => {
     setRegData({ ...regData, [e.target.name]: e.target.value });
+  };
+
+  useEffect(() => {
+    const loadRegions = async () => {
+      setIsAddressLoading(true);
+      try {
+        const regions = await getRegions();
+        setAddressOptions(prev => ({ ...prev, regions }));
+      } catch (error) {
+        console.error('Failed to load regions', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Address List Unavailable',
+          text: 'Unable to load Philippine address selections. Please check your connection.',
+          confirmButtonColor: '#0B3A68',
+          customClass: { popup: 'rounded-2xl shadow-2xl' }
+        });
+      } finally {
+        setIsAddressLoading(false);
+      }
+    };
+
+    loadRegions();
+  }, []);
+
+  const handleRegionChange = async (e) => {
+    const regionCode = e.target.value;
+    const selectedRegion = addressOptions.regions.find(item => item.code === regionCode);
+
+    setRegData(prev => ({
+      ...prev,
+      region: selectedRegion?.name || '',
+      division: '',
+      province: '',
+      city: '',
+      barangay: ''
+    }));
+    setAddressCodes({ region: regionCode, province: '', city: '', barangay: '' });
+    setAddressOptions(prev => ({ ...prev, provinces: [], cities: [], barangays: [] }));
+
+    if (!regionCode) return;
+
+    setIsAddressLoading(true);
+    try {
+      const provinces = await getProvincesByRegion(regionCode);
+      const cities = provinces.length === 0 ? await getCitiesMunicipalitiesByRegion(regionCode) : [];
+      setAddressOptions(prev => ({ ...prev, provinces, cities, barangays: [] }));
+    } catch (error) {
+      console.error('Failed to load provinces/cities', error);
+    } finally {
+      setIsAddressLoading(false);
+    }
+  };
+
+  const handleProvinceChange = async (e) => {
+    const provinceCode = e.target.value;
+    const selectedProvince = addressOptions.provinces.find(item => item.code === provinceCode);
+
+    setRegData(prev => ({
+      ...prev,
+      province: selectedProvince?.name || '',
+      city: '',
+      barangay: ''
+    }));
+    setAddressCodes(prev => ({ ...prev, province: provinceCode, city: '', barangay: '' }));
+    setAddressOptions(prev => ({ ...prev, cities: [], barangays: [] }));
+
+    if (!provinceCode) return;
+
+    setIsAddressLoading(true);
+    try {
+      const cities = await getCitiesMunicipalitiesByProvince(provinceCode);
+      setAddressOptions(prev => ({ ...prev, cities, barangays: [] }));
+    } catch (error) {
+      console.error('Failed to load cities/municipalities', error);
+    } finally {
+      setIsAddressLoading(false);
+    }
+  };
+
+  const handleCityChange = async (e) => {
+    const cityCode = e.target.value;
+    const selectedCity = addressOptions.cities.find(item => item.code === cityCode);
+
+    setRegData(prev => ({
+      ...prev,
+      city: selectedCity?.name || '',
+      barangay: ''
+    }));
+    setAddressCodes(prev => ({
+      ...prev,
+      city: cityCode,
+      barangay: ''
+    }));
+    setAddressOptions(prev => ({ ...prev, barangays: [] }));
+
+    if (!selectedCity) return;
+
+    setIsAddressLoading(true);
+    try {
+      const barangays = await getBarangaysByCityMunicipality(selectedCity.code);
+      setAddressOptions(prev => ({ ...prev, barangays }));
+    } catch (error) {
+      console.error('Failed to load barangays', error);
+    } finally {
+      setIsAddressLoading(false);
+    }
+  };
+
+  const handleBarangayChange = (e) => {
+    const barangayCode = e.target.value;
+    const selectedBarangay = addressOptions.barangays.find(item => item.code === barangayCode);
+    setRegData(prev => ({ ...prev, barangay: selectedBarangay?.name || '' }));
+    setAddressCodes(prev => ({ ...prev, barangay: barangayCode }));
   };
 
   const handleAuthSubmit = async (e) => {
@@ -161,16 +289,42 @@ const Login = () => {
     setPassword('');
     setRegData({
       first_name: '', last_name: '', email: '', password: '', confirm_password: '',
-      contact_number: '', region: 'NCR', division: '', province: '', 
+      contact_number: '', region: '', division: '', province: '',
       city: '', barangay: '', office: 'finance', position: '', 
       account_category: '', passcode: '', verification_code: ''
     });
+    setAddressCodes({ region: '', province: '', city: '', barangay: '' });
+    setAddressOptions(prev => ({ ...prev, provinces: [], cities: [], barangays: [] }));
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const isFilled = (value) => String(value ?? '').trim().length > 0;
+
+  const isStepComplete = () => {
+    if (currentStep === 1) {
+      return ['first_name', 'last_name', 'email', 'contact_number'].every(field => isFilled(regData[field]));
+    }
+
+    if (currentStep === 2) {
+      const provinceComplete = addressOptions.provinces.length === 0 || isFilled(regData.province);
+      return isFilled(regData.region) && isFilled(regData.division) && provinceComplete && isFilled(regData.city);
+    }
+
+    if (currentStep === 3) {
+      return ['barangay', 'office', 'position', 'account_category'].every(field => isFilled(regData[field]));
+    }
+
+    return ['password', 'confirm_password', 'passcode', 'verification_code'].every(field => isFilled(regData[field]));
+  };
+
+  const nextStep = (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!isStepComplete()) return;
+    setCurrentStep(prev => Math.min(prev + 1, 4));
+  };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  const renderSelect = (id, label, value, onChange, icon, options, isReg = false) => {
+  const renderSelect = (id, label, value, onChange, icon, options, isReg = false, disabled = false) => {
     const Icon = icon;
     return (
       <div className="space-y-1.5 w-full">
@@ -188,11 +342,14 @@ const Login = () => {
             onChange={onChange}
             onFocus={() => setFocusedField(id)}
             onBlur={() => setFocusedField(null)}
+            disabled={disabled}
             className="block w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] text-sm text-slate-800 font-medium transition-all duration-300 outline-none shadow-sm hover:border-slate-300 appearance-none"
           >
             <option value="" disabled>Select {label}</option>
             {options.map((opt, idx) => (
-              <option key={idx} value={opt}>{opt}</option>
+              <option key={opt.code || opt.value || idx} value={opt.code || opt.value || opt}>
+                {opt.name || opt.label || opt}
+              </option>
             ))}
           </select>
           <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
@@ -304,7 +461,7 @@ const Login = () => {
                 </p>
               </div>
 
-              <form className="space-y-5" onSubmit={handleAuthSubmit}>
+              <form className="space-y-5" onSubmit={handleAuthSubmit} noValidate>
                 {isLogin ? (
                   <>
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
@@ -350,10 +507,10 @@ const Login = () => {
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 2: Location</h3>
                         </div>
-                        {renderSelect('region', 'Region', regData.region, handleRegChange, MapPin, ['NCR'], true)}
-                        {renderSelect('division', 'Division', regData.division, handleRegChange, Building2, ['Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig'], true)}
-                        {renderSelect('province', 'Province', regData.province, handleRegChange, MapPin, ['Metro Manila'], true)}
-                        {renderSelect('city', 'City/Municipality', regData.city, handleRegChange, MapPin, ['Manila City', 'Quezon City', 'Makati City', 'Taguig City', 'Pasig City'], true)}
+                        {renderSelect('region', 'Region', addressCodes.region, handleRegionChange, MapPin, addressOptions.regions, true, isAddressLoading)}
+                        {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'Enter division', true)}
+                        {renderSelect('province', 'Province', addressCodes.province, handleProvinceChange, MapPin, addressOptions.provinces, true, !addressCodes.region || isAddressLoading || addressOptions.provinces.length === 0)}
+                        {renderSelect('city', 'City/Municipality', addressCodes.city, handleCityChange, MapPin, addressOptions.cities, true, !addressCodes.region || isAddressLoading || (addressOptions.provinces.length > 0 && !addressCodes.province))}
                       </>
                     )}
 
@@ -362,7 +519,7 @@ const Login = () => {
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 3: Role & Assignment</h3>
                         </div>
-                        {renderSelect('barangay', 'Barangay', regData.barangay, handleRegChange, MapPin, ['Barangay 1', 'Barangay 2', 'Barangay 3'], true)}
+                        {renderSelect('barangay', 'Barangay', addressCodes.barangay, handleBarangayChange, MapPin, addressOptions.barangays, true, !addressCodes.city || isAddressLoading)}
                         {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['finance'], true)}
                         {renderSelect('position', 'Position', regData.position, handleRegChange, Briefcase, ['Accountant I', 'Accountant II', 'Accountant III', 'Admin Officer'], true)}
                         {renderInput('account_category', 'Account Category', 'text', regData.account_category, handleRegChange, Hash, 'Regular', true)}
@@ -398,11 +555,20 @@ const Login = () => {
                         </button>
                       )}
                       {currentStep < 4 ? (
-                        <button type="button" onClick={nextStep} className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={nextStep}
+                          disabled={!isStepComplete()}
+                          className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:hover:bg-slate-300"
+                        >
                           Next <ChevronRight className="w-4 h-4" />
                         </button>
                       ) : (
-                        <button type="submit" disabled={isLoading} className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)]">
+                        <button
+                          type="submit"
+                          disabled={isLoading || !isStepComplete()}
+                          className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:hover:bg-slate-300"
+                        >
                           Submit Registration
                         </button>
                       )}

@@ -1,8 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronLeft, ChevronRight, Building2, MapPin, Activity, Layers, GraduationCap, Briefcase, Filter, CheckCircle2, Clock } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, MapPin, Activity, Layers, GraduationCap, Briefcase, CheckCircle2, Clock } from 'lucide-react';
 import Sidebar from "../components/Sidebar";
 import api from '../utils/api';
+
+const StatusCard = ({ title, count, icon: Icon, isActive, onClick, colorClass }) => (
+    <motion.button
+        whileHover={{ y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={onClick}
+        className={`relative overflow-hidden p-5 rounded-3xl border text-left transition-all duration-300 flex-1 min-w-[200px] ${isActive
+            ? `bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] ${colorClass.border} ring-1 ${colorClass.ring}`
+            : 'bg-white/60 hover:bg-white border-slate-200/60 hover:shadow-sm'
+            }`}
+    >
+        <div className="flex items-center justify-between mb-3">
+            <div className={`p-2.5 rounded-xl ${isActive ? colorClass.bg : 'bg-slate-100'}`}>
+                <Icon className={`w-5 h-5 ${isActive ? colorClass.text : 'text-slate-500'}`} />
+            </div>
+            <span className={`text-2xl font-extrabold ${isActive ? colorClass.textCount : 'text-slate-700'}`}>
+                {count.toLocaleString()}
+            </span>
+        </div>
+        <h3 className={`text-sm font-bold tracking-wide ${isActive ? colorClass.textCount : 'text-slate-500'}`}>
+            {title}
+        </h3>
+    </motion.button>
+);
 
 const ProjectProcess = () => {
     const [projects, setProjects] = useState([]);
@@ -76,35 +100,12 @@ const ProjectProcess = () => {
         return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
     };
 
-    const StatusCard = ({ title, count, icon: Icon, isActive, onClick, colorClass }) => (
-        <motion.button
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onClick}
-            className={`relative overflow-hidden p-5 rounded-3xl border text-left transition-all duration-300 flex-1 min-w-[200px] ${isActive
-                ? `bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] ${colorClass.border} ring-1 ${colorClass.ring}`
-                : 'bg-white/60 hover:bg-white border-slate-200/60 hover:shadow-sm'
-                }`}
-        >
-            <div className="flex items-center justify-between mb-3">
-                <div className={`p-2.5 rounded-xl ${isActive ? colorClass.bg : 'bg-slate-100'}`}>
-                    <Icon className={`w-5 h-5 ${isActive ? colorClass.text : 'text-slate-500'}`} />
-                </div>
-                <span className={`text-2xl font-extrabold ${isActive ? colorClass.textCount : 'text-slate-700'}`}>
-                    {count.toLocaleString()}
-                </span>
-            </div>
-            <h3 className={`text-sm font-bold tracking-wide ${isActive ? colorClass.textCount : 'text-slate-500'}`}>
-                {title}
-            </h3>
-        </motion.button>
-    );
-
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
 
-            <main id="project-scroll-area" className="flex-1 p-6 md:p-10 lg:p-12 pb-24 md:pb-10 h-screen overflow-y-auto z-10 custom-scrollbar">
+            <Sidebar />
+            <main id="project-scroll-area" className="flex-1 p-6 md:p-10 lg:p-12 pb-32 h-screen overflow-y-auto z-10 custom-scrollbar">
 
                 {/* Header Area */}
                 <header className="mb-8">
@@ -274,7 +275,7 @@ const ProjectProcess = () => {
                 {!isLoading && projects.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                        className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/60 shadow-sm"
+                        className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/70 backdrop-blur-md px-6 py-4 mb-4 md:mb-0 rounded-2xl border border-slate-200/60 shadow-sm"
                     >
                         <p className="text-sm font-medium text-slate-500">
                             Showing <span className="font-bold text-slate-800">{((page - 1) * limit) + 1}</span> to <span className="font-bold text-slate-800">{Math.min(page * limit, totalItems)}</span> of <span className="font-bold text-slate-800">{totalItems}</span> projects
@@ -380,7 +381,6 @@ const ProjectProcess = () => {
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
             `}} />
-            <Sidebar />
         </div>
     );
 };

@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Users, Settings, } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -19,12 +18,18 @@ const Sidebar = () => {
       animate={{ opacity: 1 }}
       className="fixed bottom-0 left-0 z-50 w-full h-20 bg-white border-t border-slate-200 shadow-md"
     >
-      <div className="flex items-center justify-around h-full">
+      <div className="flex items-center justify-around h-full px-2">
         {navItems.map(({ name, icon: Icon, path }) => {
           const isActive = pathname === path;
 
           return (
-            <button key={path} onClick={() => navigate(path)} className="relative flex flex-col items-center gap-1">
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={`relative flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors ${
+                isActive ? 'bg-blue-50' : 'hover:bg-slate-50'
+              }`}
+            >
               <Icon className={`w-6 h-6 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
               <span className={`text-[11px] font-semibold ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>{name}</span>
               {isActive && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Shield, Bell, Moon, HelpCircle, LogOut, ChevronRight, ArrowLeft, Mail, Phone, MapPin, Briefcase, Edit2, Check, X, KeyRound, Eye, EyeOff, Delete } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -19,6 +19,16 @@ const colors = {
     purple: 'bg-purple-100 text-purple-600',
     pink: 'bg-rose-100 text-rose-600',
 };
+
+const getUserFormData = (user) => ({
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
+    email: user?.email || '',
+    contact_number: user?.contact_number || '',
+    password: '',
+    passcode: user?.passcode || '',
+    confirm_passcode: user?.passcode || ''
+});
 
 const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) => {
     const handlePress = (num) => {
@@ -100,24 +110,10 @@ const PasscodeModal = ({ onVerify, onCancel, verifying, error }) => {
 
 const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(() => getUserFormData(user));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [showPasscode, setShowPasscode] = useState(false);
-
-    useEffect(() => {
-        if (user) {
-            setFormData({
-                first_name: user.first_name || '',
-                last_name: user.last_name || '',
-                email: user.email || '',
-                contact_number: user.contact_number || '',
-                password: '',
-                passcode: user.passcode || '',
-                confirm_passcode: user.passcode || ''
-            });
-        }
-    }, [user, isEditing]);
 
     const handleSave = async () => {
         // Validate passcode in Security tab
@@ -159,6 +155,7 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                 setError(data.message || 'Failed to update profile');
             }
         } catch (err) {
+            console.error('Failed to update profile', err);
             setError('Network error occurred');
         } finally {
             setSaving(false);
@@ -176,7 +173,7 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                 </button>
 
                 {(activeView === 'Personal Info' || activeView === 'Security') && !loading && user && (
-                    <button onClick={() => { setIsEditing(!isEditing); setError(''); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-sm font-bold shadow-sm ${isEditing ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-[#0B2D71] text-white hover:bg-[#0B2D71]/90 hover:shadow-md'}`}>
+                    <button onClick={() => { setFormData(getUserFormData(user)); setIsEditing(!isEditing); setError(''); }} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-sm font-bold shadow-sm ${isEditing ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-[#0B2D71] text-white hover:bg-[#0B2D71]/90 hover:shadow-md'}`}>
                         {isEditing ? (
                             <><X className="w-4 h-4" /> Cancel Edit</>
                         ) : (
@@ -428,6 +425,7 @@ const Profile = () => {
                 setLogoutError(data.message || 'Invalid passcode.');
             }
         } catch (error) {
+            console.error('Failed to verify logout passcode', error);
             setLogoutError('Network error occurred.');
         } finally {
             setVerifyingLogout(false);
@@ -435,10 +433,11 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24 overflow-hidden relative font-sans">
+        <div className="min-h-screen bg-slate-50 pb-28 overflow-hidden relative font-sans">
             <Sidebar />
 
             {/* Official DepEd Themed Header */}
+            <main className="flex-1">
             <div className="bg-[#0B2D71] px-6 pt-8 pb-20 rounded-b-[2.5rem] relative overflow-hidden shadow-xl border-b-4 border-[#E53935]">
                 {/* Decorative background blur */}
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#FBC02D] rounded-full blur-[100px] opacity-10 -mr-20 -mt-32 pointer-events-none"></div>
@@ -517,6 +516,7 @@ const Profile = () => {
                     <PasscodeModal onVerify={handleLogoutSubmit} onCancel={() => { setShowLogoutModal(false); setLogoutError(''); }} verifying={verifyingLogout} error={logoutError} />
                 )}
             </AnimatePresence>
+            </main>
         </div>
     );
 };

@@ -1,7 +1,5 @@
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5174';
-export const BASE_URL = isLocalhost
-  ? 'http://localhost:5000/api'
-  : 'https://backend-1-7zxj.onrender.com/api';
+export const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
 
 /**
  * Reusable HTTP client for interacting with the backend API.
