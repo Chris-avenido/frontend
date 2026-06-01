@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ChevronRight, User, MapPin, Building2, Briefcase, Phone, Hash, KeyRound } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../utils/api';
+import { clearSessionUser, isAllowedRole, setSessionUser } from '../utils/authSession';
 import logo from '../assets/new_logo.png';
 import {
   getBarangaysByCityMunicipality,
@@ -188,10 +189,16 @@ const Login = () => {
 
       try {
         const response = await api.post('/users/login', { email, password, loginMethod });
+        const authenticatedUser = response.data.user;
+
+        if (!isAllowedRole(authenticatedUser?.role)) {
+          clearSessionUser();
+          throw new Error('Only Finance and Super User accounts can access this portal.');
+        }
+
+        setSessionUser(authenticatedUser);
         localStorage.setItem('expiryTime', expiryTime);
-        localStorage.setItem('user', response.data.user.uid);
-        localStorage.setItem('role', response.data.user.role);
-        localStorage.setItem('division', response.data.user.division);
+        localStorage.setItem('division', authenticatedUser.division || '');
 
         Swal.fire({
           icon: 'success',

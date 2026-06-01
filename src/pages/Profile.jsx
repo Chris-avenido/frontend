@@ -4,6 +4,7 @@ import { User, Shield, Bell, Moon, HelpCircle, LogOut, ChevronRight, ArrowLeft, 
 import Sidebar from '../components/Sidebar';
 import insightEdLogo from '../assets/new_logo.png';
 import { BASE_URL } from '../utils/api';
+import { clearSessionUser, getSessionUser } from '../utils/authSession';
 const items = [
     ['Personal Info', 'Manage account details', User, 'blue'],
     ['Security', 'Privacy & passcode', Shield, 'green'],
@@ -386,10 +387,16 @@ const Profile = () => {
     const [verifyingLogout, setVerifyingLogout] = useState(false);
     const [logoutError, setLogoutError] = useState('');
 
-    const userId = '01a6595d-9e55-45da-babf-0faa0527914e';
+    const sessionUser = getSessionUser();
+    const userId = sessionUser?.uid;
 
     useEffect(() => {
         const fetchUser = async () => {
+            if (!userId) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const res = await fetch(`${BASE_URL}/users/${userId}`);
                 const data = await res.json();
@@ -419,7 +426,7 @@ const Profile = () => {
             });
             const data = await res.json();
             if (data.success) {
-                localStorage.clear();
+                clearSessionUser();
                 window.location.href = '/';
             } else {
                 setLogoutError(data.message || 'Invalid passcode.');

@@ -18,7 +18,7 @@ const Sidebar = () => {
       animate={{ opacity: 1 }}
       className="fixed bottom-0 left-0 z-50 w-full border-t border-[var(--line)] bg-white/90 shadow-[0_-12px_34px_rgba(13,45,88,0.08)] backdrop-blur-xl"
     >
-      <div className="mx-auto flex h-[84px] max-w-[1040px] items-center justify-center gap-2 px-3 sm:gap-3 sm:px-5">
+      <div className="mx-auto flex min-h-[84px] max-w-[1040px] flex-col justify-center gap-3 px-3 py-3 sm:px-5 lg:flex-row lg:items-center">
         {navItems.map(({ name, icon: Icon, path }) => {
           const isActive = pathname === path;
 

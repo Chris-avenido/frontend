@@ -12,6 +12,9 @@ const Home = () => {
   const [tranche1, setTranche1] = useState(0);
   const [tranche2, setTranche2] = useState(0);
   const [tranche3, setTranche3] = useState(0);
+  const [tranche1Amount, setTranche1Amount] = useState(0);
+  const [tranche2Amount, setTranche2Amount] = useState(0);
+  const [tranche3Amount, setTranche3Amount] = useState(0);
 
   useEffect(() => {
     const fetchTotalProject = async () => {
@@ -20,9 +23,12 @@ const Home = () => {
         const summary = response.data.summary;
         setTotalProject(Number(summary.total_project || 287));
         setTotalBudget(Number(summary.approved_budget_for_contract || 1000300000));
-        setTranche1(124);
-        setTranche2(96);
-        setTranche3(67);
+        setTranche1(Number(summary.tranche_1_count || 0));
+        setTranche2(Number(summary.tranche_2_count || 0));
+        setTranche3(Number(summary.tranche_3_count || 0));
+        setTranche1Amount(Number(summary.tranche_1_amount || 0));
+        setTranche2Amount(Number(summary.tranche_2_amount || 0));
+        setTranche3Amount(Number(summary.tranche_3_amount || 0));
       } catch (error) {
         console.error('Failed to fetch projects', error);
         setTotalProject(287);
@@ -30,6 +36,9 @@ const Home = () => {
         setTranche1(124);
         setTranche2(96);
         setTranche3(67);
+        setTranche1Amount(458000000);
+        setTranche2Amount(458000000);
+        setTranche3Amount(458000000);
       } finally {
         setIsLoading(false);
       }
@@ -49,9 +58,9 @@ const Home = () => {
   ];
 
   const fundingStats = [
-    { label: 'Total amount for Tranche 1', value: 458000000, progress: 46 },
-    { label: 'Total amount for Tranche 2', value: 458000000, progress: 54 },
-    { label: 'Total amount for Tranche 3', value: 458000000, progress: 62 }
+    { label: 'Total amount for Tranche 1', value: tranche1Amount, progress: 46 },
+    { label: 'Total amount for Tranche 2', value: tranche2Amount, progress: 54 },
+    { label: 'Total amount for Tranche 3', value: tranche3Amount, progress: 62 }
   ];
 
   return (
