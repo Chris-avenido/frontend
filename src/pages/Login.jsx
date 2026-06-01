@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ChevronRight, User, MapPin, Building2, Briefcase, Phone, Hash, KeyRound } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../utils/api';
-import logo from '../assets/InsightEd1.png';
+import logo from '../assets/new_logo.png';
 import {
   getBarangaysByCityMunicipality,
   getCitiesMunicipalitiesByProvince,
@@ -328,12 +328,12 @@ const Login = () => {
     const Icon = icon;
     return (
       <div className="space-y-1.5 w-full">
-        <label htmlFor={id} className="block text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--ink-soft)] uppercase tracking-wider ml-1">
           {label}
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
-            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[#0B3A68]' : 'text-slate-400'}`} />
+            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--brand-navy)]' : 'text-slate-400'}`} />
           </div>
           <select
             id={id}
@@ -343,7 +343,7 @@ const Login = () => {
             onFocus={() => setFocusedField(id)}
             onBlur={() => setFocusedField(null)}
             disabled={disabled}
-            className="block w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] text-sm text-slate-800 font-medium transition-all duration-300 outline-none shadow-sm hover:border-slate-300 appearance-none"
+            className="brand-input block w-full rounded-xl py-3 pl-10 pr-4 text-sm font-semibold appearance-none"
           >
             <option value="" disabled>Select {label}</option>
             {options.map((opt, idx) => (
@@ -364,12 +364,12 @@ const Login = () => {
     const Icon = icon;
     return (
       <div className="space-y-1.5 w-full">
-        <label htmlFor={id} className="block text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--ink-soft)] uppercase tracking-wider ml-1">
           {label}
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
-            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[#0B3A68]' : 'text-slate-400'}`} />
+            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--brand-navy)]' : 'text-slate-400'}`} />
           </div>
           <input
             id={id}
@@ -379,14 +379,14 @@ const Login = () => {
             onChange={onChange}
             onFocus={() => setFocusedField(id)}
             onBlur={() => setFocusedField(null)}
-            className="block w-full pl-10 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] text-sm text-slate-800 font-medium transition-all duration-300 outline-none shadow-sm hover:border-slate-300"
+            className="brand-input block w-full rounded-xl py-3 pl-10 pr-4 text-sm font-semibold"
             placeholder={placeholder}
           />
           {id === 'password' && (
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center justify-center text-slate-400 hover:text-[#0B3A68] transition-colors focus:outline-none"
+              className="brand-focus absolute inset-y-0 right-0 pr-4 flex items-center justify-center text-slate-400 hover:text-[var(--brand-navy)] transition-colors"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -397,51 +397,61 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] relative overflow-hidden font-sans selection:bg-[#0B3A68] selection:text-white py-10">
-      <div className="absolute inset-0 z-0 opacity-40">
-        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-[#0B3A68]/10 to-transparent rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-tl from-[#FDC115]/15 to-transparent rounded-full blur-[80px]" />
-        <div className="absolute top-[30%] right-[10%] w-[400px] h-[400px] bg-gradient-to-l from-[#D31F35]/5 to-transparent rounded-full blur-[60px]" />
+    <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden py-8 font-sans sm:py-10">
+      <div className="absolute inset-0 z-0 opacity-80">
+        <div className="absolute left-[-12%] top-[-24%] h-[760px] w-[760px] rounded-full bg-[var(--brand-navy)]/10 blur-[110px]" />
+        <div className="absolute bottom-[-22%] right-[-12%] h-[600px] w-[600px] rounded-full bg-[var(--brand-gold)]/20 blur-[95px]" />
       </div>
 
-      <div className={`w-full ${isLogin ? 'max-w-[1000px]' : 'max-w-[1200px]'} mx-auto p-4 relative z-10 flex flex-col items-stretch shadow-2xl rounded-3xl overflow-hidden bg-white/70 backdrop-blur-xl border border-white/50 transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+      <div className={`brand-card w-full ${isLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[var(--radius-xl)] bg-white/82 backdrop-blur-xl transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
         
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`hidden md:flex ${isLogin ? 'md:w-1/2' : 'md:w-1/3'} bg-gradient-to-br from-[#0B3A68] to-[#06213D] p-12 flex-col justify-between relative overflow-hidden text-white`}
+          className={`academic-grid hidden md:flex ${isLogin ? 'md:w-1/2' : 'md:w-1/3'} relative flex-col justify-between overflow-hidden bg-[var(--brand-navy)] p-12 text-white`}
         >
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[var(--brand-gold)]/24 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 h-1.5 w-full bg-[var(--brand-gold)]"></div>
           <div className="relative z-10">
             <motion.div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-                <ShieldCheck className="w-6 h-6 text-[#FDC115]" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-sm">
+                <img src={logo} alt="InsightED Logo" className="h-14 w-14 object-contain" />
               </div>
-              <span className="text-xl font-bold tracking-wider uppercase text-white/90">InsightED</span>
+              <div>
+                <span className="text-xl font-extrabold tracking-tight text-white">InsightED</span>
+                <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-gold)]">Infrastructure Intelligence</p>
+              </div>
             </motion.div>
           </div>
           <motion.div layout className="relative z-10 space-y-6">
             <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
-              {isLogin ? 'Finance' : 'Join the'} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FDC115] to-[#fde08b]">
-                {isLogin ? 'Command Center' : 'Network'}
+              {isLogin ? 'Academic' : 'Join the'} <br />
+              <span className="text-[var(--brand-gold)]">
+                {isLogin ? 'Finance Portal' : 'Insight Network'}
               </span>
             </h1>
-            <p className="text-blue-100/80 text-lg max-w-md font-light leading-relaxed">
+            <p className="text-blue-100/85 text-lg max-w-md font-medium leading-relaxed">
               {isLogin
-                ? 'Enterprise-grade financial oversight and resource allocation for the Department of Education.'
+                ? 'A trusted workspace for monitoring school infrastructure funding, progress, and accountability.'
                 : 'Secure your administrative access to monitor and manage departmental resource allocation.'}
             </p>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              {['Transparent', 'Academic', 'Secure', 'Insightful'].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/90 backdrop-blur">
+                  {item}
+                </div>
+              ))}
+            </div>
           </motion.div>
-          <div className="relative z-10 text-xs text-blue-200/50 uppercase tracking-widest font-semibold">
-            © 2026 Department of Education
+          <div className="relative z-10 text-xs text-blue-100/60 uppercase tracking-widest font-semibold">
+            (c) 2026 Department of Education
           </div>
         </motion.div>
 
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`w-full ${isLogin ? 'md:w-1/2' : 'md:w-2/3'} bg-white p-8 md:p-14 lg:p-16 flex flex-col justify-center relative max-h-[90vh] overflow-y-auto custom-scrollbar`}
+          className={`app-scroll relative flex max-h-[90vh] w-full flex-col justify-center overflow-y-auto bg-white p-6 sm:p-8 md:p-12 lg:p-14 ${isLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -451,12 +461,13 @@ const Login = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col items-center mb-10">
-                <img src={logo} alt="InsightEd Logo" className="h-16 md:h-20 lg:h-24 w-auto object-contain mb-6 drop-shadow-md" />
-                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+              <div className="mb-9 flex flex-col items-center">
+                <img src={logo} alt="InsightED Logo" className="mb-5 h-20 w-auto object-contain drop-shadow-sm md:h-24" />
+                <p className="brand-kicker mb-2">{isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`}</p>
+                <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--ink)]">
                   {isLogin ? 'Welcome Back' : 'Create Account'}
                 </h2>
-                <p className="text-sm font-medium text-slate-500 mt-2 text-center">
+                <p className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
                   {isLogin ? 'Please authenticate your administrative account.' : 'Register your details to request system access. Ensure all information is accurate.'}
                 </p>
               </div>
@@ -466,11 +477,11 @@ const Login = () => {
                   <>
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
                     {loginMethod === 'password' 
-                      ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '••••••••')
+                      ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '********')
                       : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value), KeyRound, '123456')}
                     
                     <div className="flex justify-end mt-1">
-                      <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="text-xs font-bold text-[#0B3A68] hover:text-blue-700">
+                      <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--brand-navy)] hover:text-[var(--brand-navy-deep)]">
                         {loginMethod === 'password' ? 'Login via Passcode instead' : 'Login via Password instead'}
                       </button>
                     </div>
@@ -478,14 +489,14 @@ const Login = () => {
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center group cursor-pointer">
                         <div className="relative flex items-center justify-center w-4 h-4 mr-2">
-                          <input type="checkbox" className="peer appearance-none w-4 h-4 border-2 border-slate-300 rounded cursor-pointer checked:bg-[#0B3A68] checked:border-[#0B3A68] transition-all" />
+                          <input type="checkbox" className="peer appearance-none w-4 h-4 border-2 border-slate-300 rounded cursor-pointer checked:bg-[var(--brand-navy)] checked:border-[var(--brand-navy)] transition-all" />
                           <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 14 14" fill="none">
                             <path d="M3 8L6 11L11 3.5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor"></path>
                           </svg>
                         </div>
                         <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember device</span>
                       </label>
-                      <a href="#" className="text-sm font-bold text-[#D31F35] hover:text-[#a01627] transition-colors">Forgot credentials?</a>
+                      <a href="#" className="brand-focus text-sm font-bold text-[var(--brand-red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
                     </div>
                   </>
                 ) : (
@@ -493,7 +504,7 @@ const Login = () => {
                     {currentStep === 1 && (
                       <>
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
-                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 1: Personal Information</h3>
+                          <h3 className="brand-kicker">Step 1: Personal Information</h3>
                         </div>
                         {renderInput('first_name', 'First Name', 'text', regData.first_name, handleRegChange, User, 'Juan', true)}
                         {renderInput('last_name', 'Last Name', 'text', regData.last_name, handleRegChange, User, 'Dela Cruz', true)}
@@ -505,7 +516,7 @@ const Login = () => {
                     {currentStep === 2 && (
                       <>
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
-                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 2: Location</h3>
+                          <h3 className="brand-kicker">Step 2: Location</h3>
                         </div>
                         {renderSelect('region', 'Region', addressCodes.region, handleRegionChange, MapPin, addressOptions.regions, true, isAddressLoading)}
                         {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'Enter division', true)}
@@ -517,7 +528,7 @@ const Login = () => {
                     {currentStep === 3 && (
                       <>
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
-                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 3: Role & Assignment</h3>
+                          <h3 className="brand-kicker">Step 3: Role & Assignment</h3>
                         </div>
                         {renderSelect('barangay', 'Barangay', addressCodes.barangay, handleBarangayChange, MapPin, addressOptions.barangays, true, !addressCodes.city || isAddressLoading)}
                         {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['finance'], true)}
@@ -529,10 +540,10 @@ const Login = () => {
                     {currentStep === 4 && (
                       <>
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
-                          <h3 className="text-sm font-bold text-[#0B3A68] uppercase tracking-wider">Step 4: Security</h3>
+                          <h3 className="brand-kicker">Step 4: Security</h3>
                         </div>
-                        {renderInput('password', 'Password', 'password', regData.password, handleRegChange, Lock, '••••••••', true)}
-                        {renderInput('confirm_password', 'Confirm Password', 'password', regData.confirm_password, handleRegChange, Lock, '••••••••', true)}
+                        {renderInput('password', 'Password', 'password', regData.password, handleRegChange, Lock, '********', true)}
+                        {renderInput('confirm_password', 'Confirm Password', 'password', regData.confirm_password, handleRegChange, Lock, '********', true)}
                         {renderInput('passcode', '6-Digit Passcode', 'password', regData.passcode, handleRegChange, KeyRound, '123456', true)}
                         {renderInput('verification_code', 'Admin Verification Code', 'text', regData.verification_code, handleRegChange, ShieldCheck, 'Enter Code', true)}
                       </>
@@ -542,7 +553,7 @@ const Login = () => {
 
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
                   {isLogin ? (
-                    <button type="submit" disabled={isLoading} className="group w-full flex items-center justify-center gap-2 py-4 px-4 border border-transparent rounded-xl shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)] text-sm font-bold text-white bg-gradient-to-r from-[#0B3A68] to-[#092a4a] hover:shadow-[0_12px_20px_-8px_rgba(11,58,104,0.4)] hover:to-[#0B3A68] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B3A68] transition-all duration-300 overflow-hidden relative">
+                    <button type="submit" disabled={isLoading} className="brand-button-primary brand-focus group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-4 text-sm font-extrabold disabled:opacity-70">
                       <span className="relative z-10">Secure Authentication</span>
                       <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
                       <div className="absolute inset-0 h-full w-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
@@ -559,7 +570,7 @@ const Login = () => {
                           type="button"
                           onClick={nextStep}
                           disabled={!isStepComplete()}
-                          className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:hover:bg-slate-300"
+                          className="brand-button-primary brand-focus flex flex-1 items-center justify-center gap-2 rounded-xl py-4 font-bold disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
                         >
                           Next <ChevronRight className="w-4 h-4" />
                         </button>
@@ -567,7 +578,7 @@ const Login = () => {
                         <button
                           type="submit"
                           disabled={isLoading || !isStepComplete()}
-                          className="flex-1 py-4 rounded-xl bg-[#0B3A68] text-white font-bold hover:bg-[#092a4a] transition-colors shadow-[0_8px_16px_-6px_rgba(11,58,104,0.3)] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:hover:bg-slate-300"
+                          className="brand-button-primary brand-focus flex-1 rounded-xl py-4 font-bold disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
                         >
                           Submit Registration
                         </button>
@@ -580,7 +591,7 @@ const Login = () => {
               <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
                 <p className="text-sm font-medium text-slate-500">
                   {isLogin ? 'Unauthorized access is strictly prohibited. ' : 'Already have an administrative account? '}
-                  <button onClick={toggleAuthMode} className="font-bold text-[#FDC115] hover:text-[#d4a00a] transition-colors focus:outline-none">
+                  <button onClick={toggleAuthMode} className="brand-focus font-bold text-[var(--brand-gold)] hover:text-amber-600 transition-colors">
                     {isLogin ? 'Request Authorization' : 'Secure Sign In'}
                   </button>
                 </p>
