@@ -27,7 +27,7 @@ export const PageHeader = ({ title, subtitle, eyebrow, action, children }) => (
     <div className="absolute right-8 top-6 h-28 w-28 rounded-full bg-[var(--brand-gold)]/14 blur-3xl"></div>
     <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-5 py-7 sm:px-7 lg:flex-row lg:items-center lg:justify-between lg:px-8">
       <div className="flex items-start gap-4">
-        <BrandLockup compact title="InsightED" subtitle="Infrastructure Intelligence" />
+        <BrandLockup compact title="InsightED" />
         <div className="hidden h-14 w-px bg-[var(--line)] sm:block"></div>
         <div className="min-w-0 pt-1">
           {eyebrow && <p className="brand-kicker mb-2">{eyebrow}</p>}

@@ -68,9 +68,8 @@ const Home = () => {
       <Sidebar />
       <main className="flex-1 h-screen overflow-y-auto z-10 app-scroll relative">
         <PageHeader
-          eyebrow="Academic Finance Dashboard"
-          title="Infrastructure Budget Monitoring"
-          subtitle="A consolidated view of project volume, tranche progress, and funding movement across school infrastructure programs."
+          eyebrow="InsightED Infrastructure"
+          title="Budget Monitoring"
         />
 
         <motion.div
@@ -152,19 +151,7 @@ const Home = () => {
             </div>
           </section>
 
-          <section className="brand-card rounded-[var(--radius-xl)] p-5 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="brand-kicker">Insight Layer</p>
-                <h2 className="mt-2 text-xl font-extrabold text-[var(--ink)]">Learning environments backed by transparent funding.</h2>
-                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[var(--muted)]">
-                  The dashboard visual system pairs academic trust with financial clarity: navy for institution, gold for progress, and restrained red for attention states.
-                </p>
-              </div>
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--brand-navy)] text-white shadow-md">
-                <BarChart3 className="h-7 w-7" />
-              </div>
-            </div>
+          <section className="p-5 md:p-6">
           </section>
         </motion.div>
       </main>
