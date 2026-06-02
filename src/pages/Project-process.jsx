@@ -62,16 +62,7 @@ const FundProgressBar = ({ value }) => (
     </div>
 );
 
-const FundCertificateCard = ({ label, value, note }) => (
-    <section className="fund-modal-certificate">
-        <div>
-            <span>{label}</span>
-            <strong>{value}%</strong>
-        </div>
-        <FundProgressBar value={value} />
-        <p>{note}</p>
-    </section>
-);
+const displayOrDash = (value) => value || '-';
 
 const FundTranchePanel = ({ title, trancheValue, liquidationValue, locked = false }) => (
     <section className="fund-modal-panel">
@@ -136,44 +127,30 @@ const trancheStatusLabels = {
 
 const getTrancheStatusLabel = (flag) => trancheStatusLabels[Number(flag || 0)] || 'New';
 const hasTrancheAmount = (value) => Number(value || 0) > 0;
-const getTotalTrancheReleased = (fund = {}) => (
-    Number(fund.tranche_1 || 0) + Number(fund.tranche_2 || 0) + Number(fund.tranche_3 || 0)
-);
+const getLatestTrancheStatus = (fund = {}) => {
+    if (hasTrancheAmount(fund.tranche_3)) return 'Tranche 3';
+    if (hasTrancheAmount(fund.tranche_2)) return 'Tranche 2';
+    if (hasTrancheAmount(fund.tranche_1)) return 'Tranche 1';
+    return 'No Tranche';
+};
+const getLatestTrancheAmount = (fund = {}) => {
+    const status = fund.latest_tranche_status || getLatestTrancheStatus(fund);
 
-const TrancheSummaryCard = ({ trancheFund, formatCurrency }) => {
-    const fund = trancheFund || emptyTrancheFund;
-    const rows = [
-        ['Tranche 1 Amount', fund.tranche_1],
-        ['Tranche 2 Amount', fund.tranche_2],
-        ['Tranche 3 Amount', fund.tranche_3]
-    ];
+    if (status === 'Tranche 3') return fund.tranche_3;
+    if (status === 'Tranche 2') return fund.tranche_2;
+    if (status === 'Tranche 1') return fund.tranche_1;
+    return 0;
+};
+const getProjectTitle = (project = {}) => {
+    const projectName = project.project_name || '';
+    const schoolName = project.school_name || '';
+    const schoolId = project.school_id || '';
+    const schoolLabel = [schoolName, schoolId].filter(Boolean).join(' | ');
 
-    return (
-        <section className="rounded-[20px] border border-[var(--line)] bg-white p-6 shadow-[0_2px_8px_rgba(13,45,88,0.10)]">
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--brand-gold-soft)] text-[var(--brand-navy)]">
-                        <WalletCards className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-base font-extrabold text-[var(--ink)]">Tranche Summary</h2>
-                </div>
-                <span className="w-fit rounded-lg border border-[var(--brand-gold)]/40 bg-[var(--brand-gold-soft)] px-3 py-1.5 text-xs font-extrabold text-[var(--brand-navy)]">
-                    {getTrancheStatusLabel(fund.tranche_flag)}
-                </span>
-            </div>
+    if (projectName && schoolLabel) return `${projectName} (${schoolLabel})`;
+    if (projectName) return projectName;
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {rows.map(([label, value]) => (
-                    <div key={label} className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-soft)] p-4">
-                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--muted)]">{label}</p>
-                        <p className="mt-2 text-lg font-extrabold text-[var(--ink)]">
-                            {hasTrancheAmount(value) ? formatCurrency(value) : 'Pending'}
-                        </p>
-                    </div>
-                ))}
-            </div>
-        </section>
-    );
+    return schoolLabel || 'Unknown School';
 };
 
 const TrancheManagementModal = ({ isOpen, onClose, project, trancheFund, onSaved, formatCurrency }) => {
@@ -425,22 +402,23 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgre
                         transition={{ duration: 0.22, ease: 'easeOut' }}
                         onMouseDown={(event) => event.stopPropagation()}
                     >
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="fund-modal-close brand-focus"
-                            aria-label="Close fund download workflow"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
-
                         <div className="fund-modal-body app-scroll">
                             <header className="fund-modal-header">
                                 <div>
                                     <p>InsightED Infrastructure</p>
                                     <h2>Fund Management</h2>
                                 </div>
-                                <span>Download Review</span>
+                                <div className="fund-modal-header-actions">
+                                    <span>Review Details</span>
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="fund-modal-close brand-focus"
+                                        aria-label="Close fund download workflow"
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </button>
+                                </div>
                             </header>
 
                             <section className="fund-modal-project-card">
@@ -454,22 +432,9 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgre
                                     <strong>{new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(budget)}</strong>
                                 </div>
                                 <div className="fund-modal-meta">
-                                    <p>Contractor: <strong>{project.contractor || 'XYZ Company'}</strong></p>
-                                    <p>PCAB License: <strong>{project.pcab_license || '239404'}</strong></p>
+                                    <p>Contractor: <strong>{displayOrDash(project.contractor_name)}</strong></p>
+                                    <p>PCAB License: <strong>{displayOrDash(project.pcab_license_number)}</strong></p>
                                 </div>
-                            </section>
-
-                            <section className="fund-modal-certificate-grid">
-                                <FundCertificateCard
-                                    label="Certificate Percentage"
-                                    value={certValue}
-                                    note="Must be eligible for Tranche 2"
-                                />
-                                <FundCertificateCard
-                                    label="Liquidation Percentage"
-                                    value={liquidationValue}
-                                    note="Must be eligible for Tranche 3"
-                                />
                             </section>
 
                             <section className="fund-modal-work-grid">
@@ -480,11 +445,8 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgre
                             </section>
 
                             <footer className="fund-modal-actions">
-                                <button type="button" className="brand-button-secondary brand-focus" onClick={onClose}>
-                                    Cancel
-                                </button>
-                                <button type="button" className="brand-button-primary brand-focus">
-                                    Prepare Download
+                                <button type="button" className="brand-button-primary brand-focus" onClick={onClose}>
+                                    Close
                                 </button>
                             </footer>
                         </div>
@@ -499,7 +461,6 @@ const ProjectDetailView = ({ project, onBack }) => {
     const [isFundModalOpen, setIsFundModalOpen] = useState(false);
     const [isTrancheModalOpen, setIsTrancheModalOpen] = useState(false);
     const [trancheFund, setTrancheFund] = useState(null);
-    const [isTrancheLoading, setIsTrancheLoading] = useState(true);
 
     const formatCurrency = (amount) => {
         if (!amount) return 'PHP 0.00';
@@ -513,15 +474,12 @@ const ProjectDetailView = ({ project, onBack }) => {
 
     useEffect(() => {
         const fetchTrancheFund = async () => {
-            setIsTrancheLoading(true);
             try {
                 const response = await api.get(`/projects/${project.project_id}/tranches`);
                 setTrancheFund(response.data || null);
             } catch (error) {
                 console.error('Failed to fetch tranche data', error);
                 setTrancheFund(null);
-            } finally {
-                setIsTrancheLoading(false);
             }
         };
 
@@ -641,11 +599,6 @@ const ProjectDetailView = ({ project, onBack }) => {
                             ['Utilization', `${project.accomplishment_percentage || 50}%`]
                         ]}
                     />
-                    {isTrancheLoading ? (
-                        <SkeletonBlock className="h-52" />
-                    ) : (
-                        <TrancheSummaryCard trancheFund={trancheFund} formatCurrency={formatCurrency} />
-                    )}
                 </div>
             </div>
 
@@ -686,6 +639,7 @@ const ProjectProcess = () => {
     const [showFilters, setShowFilters] = useState(false);
 
     const [statusCounts, setStatusCounts] = useState({ total: 0, tranche_1: 0, tranche_2: 0, tranche_3: 0 });
+    const [filterOptions, setFilterOptions] = useState({ regions: [], divisions: [] });
     const [selectedProject, setSelectedProject] = useState(null);
 
     const fetchProjects = async (currentPage, search, status, school, reg, div) => {
@@ -702,12 +656,18 @@ const ProjectProcess = () => {
             }).toString();
 
             const response = await api.get(`/projects/process?${queryParams}`);
-            const { data, total, statusCounts: counts } = response.data;
+            const { data, total, statusCounts: counts, filterOptions: options } = response.data;
 
             setProjects(data || []);
             setTotalItems(total || 0);
             setTotalPages(Math.ceil((total || 0) / limit));
             if (counts) setStatusCounts(counts);
+            if (options) {
+                setFilterOptions({
+                    regions: Array.isArray(options.regions) ? options.regions : [],
+                    divisions: Array.isArray(options.divisions) ? options.divisions : []
+                });
+            }
         } catch (error) {
             console.error('Failed to fetch projects', error);
         } finally {
@@ -823,10 +783,20 @@ const ProjectProcess = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="brand-card mt-3 grid grid-cols-1 gap-3 rounded-[var(--radius-lg)] p-4 md:grid-cols-3"
                         >
-                            <input type="text" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Filter Region"
-                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold" />
-                            <input type="text" value={division} onChange={(e) => setDivision(e.target.value)} placeholder="Filter Division"
-                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold" />
+                            <select value={region} onChange={(e) => setRegion(e.target.value)}
+                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold">
+                                <option value="">All Regions</option>
+                                {filterOptions.regions.map((item) => (
+                                    <option key={item} value={item}>{item}</option>
+                                ))}
+                            </select>
+                            <select value={division} onChange={(e) => setDivision(e.target.value)}
+                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold">
+                                <option value="">All Divisions</option>
+                                {filterOptions.divisions.map((item) => (
+                                    <option key={item} value={item}>{item}</option>
+                                ))}
+                            </select>
                             <input type="text" value={schoolId} onChange={(e) => setSchoolId(e.target.value)} placeholder="School ID"
                                 className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold" />
                         </motion.div>
@@ -865,7 +835,7 @@ const ProjectProcess = () => {
                                                     {project.accomplishment_status || 'Active'}
                                                 </span>
                                                 <h3 className="text-lg font-extrabold leading-snug text-[var(--ink)] md:text-xl">
-                                                    {project.project_name || project.school_id || 'Unknown School'}
+                                                    {getProjectTitle(project)}
                                                 </h3>
                                                 <div className="mt-4 flex items-center gap-3 text-base font-bold text-[var(--ink-soft)]">
                                                     <MapPin className="h-4 w-4 shrink-0 text-[var(--muted)]" />
@@ -883,7 +853,7 @@ const ProjectProcess = () => {
                                                     ['Total Budget', formatCurrency(project.contract_amount)],
                                                     ['Total Funds Released', formatCurrency(project.approved_budget_for_contract)],
                                                     ['Total Liquidation', formatCurrency(project.approved_budget_for_contract)],
-                                                    ['Tranche Status', formatCurrency(getTotalTrancheReleased(project))]
+                                                    [project.latest_tranche_status || getLatestTrancheStatus(project), formatCurrency(getLatestTrancheAmount(project))]
                                                 ].map(([label, value]) => (
                                                     <div
                                                         key={label}
