@@ -367,8 +367,27 @@ const Login = () => {
     );
   };
 
-  const renderInput = (id, label, type, value, onChange, icon, placeholder, isReg = false) => {
+  const renderInput = (id, label, type, value, onChange, icon, placeholder, isReg = false, autocomplete) => {
     const Icon = icon;
+
+    // Auto-determine autocomplete attribute based on ID and form context
+    let autoValue = autocomplete;
+    if (!autoValue) {
+      if (id === 'password') {
+        autoValue = isReg ? 'new-password' : 'current-password';
+      } else if (id === 'confirm_password' || id === 'passcode') {
+        autoValue = 'new-password';
+      } else if (id === 'email') {
+        autoValue = 'email';
+      } else if (id === 'first_name') {
+        autoValue = 'given-name';
+      } else if (id === 'last_name') {
+        autoValue = 'family-name';
+      } else if (id === 'contact_number') {
+        autoValue = 'tel';
+      }
+    }
+
     return (
       <div className="space-y-1.5 w-full">
         <label htmlFor={id} className="block text-xs font-extrabold text-[var(--ink-soft)] uppercase tracking-wider ml-1">
@@ -386,6 +405,7 @@ const Login = () => {
             onChange={onChange}
             onFocus={() => setFocusedField(id)}
             onBlur={() => setFocusedField(null)}
+            autoComplete={autoValue}
             className="brand-input block w-full rounded-xl py-3 pl-10 pr-4 text-sm font-semibold"
             placeholder={placeholder}
           />
