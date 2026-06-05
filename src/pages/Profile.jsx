@@ -33,7 +33,7 @@ const getUserFormData = (user) => ({
 
 const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) => {
     const handlePress = (num) => {
-        if (passcode.length < 8) setPasscode(prev => prev + num);
+        if (passcode.length < 6) setPasscode(prev => prev + num);
     };
 
     const handleDelete = () => {
@@ -44,7 +44,7 @@ const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) 
         setPasscode('');
     };
 
-    const dots = Array.from({ length: Math.max(6, passcode.length) });
+    const dots = Array.from({ length: 6 });
 
     return (
         <div className="w-full mt-4">
@@ -75,7 +75,7 @@ const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) 
                 <button onClick={onCancel} className="brand-button-secondary brand-focus flex-1 py-4 rounded-xl font-bold tracking-wide">
                     CANCEL
                 </button>
-                <button onClick={() => onVerify(passcode)} disabled={verifying || passcode.length === 0} className="brand-focus flex-1 py-4 rounded-xl bg-[var(--brand-red)] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-50 tracking-wide shadow-md">
+                <button onClick={() => onVerify(passcode)} disabled={verifying || passcode.length !== 6} className="brand-focus flex-1 py-4 rounded-xl bg-[var(--brand-red)] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-50 tracking-wide shadow-md">
                     {verifying ? 'VERIFYING...' : 'CONFIRM'}
                 </button>
             </div>
@@ -221,7 +221,12 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                 </div>
                                 <div className="space-y-1.5 md:col-span-2">
                                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Contact Number</label>
-                                    <input type="text" value={formData.contact_number} onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })} className="brand-input w-full p-4 rounded-xl font-bold" />
+                                    <input type="text" value={formData.contact_number || '+63'} onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (!val.startsWith('+63')) val = '+63';
+                                        if (val.length > 13) val = val.slice(0, 13);
+                                        setFormData({ ...formData, contact_number: val });
+                                    }} maxLength={13} className="brand-input w-full p-4 rounded-xl font-bold" />
                                 </div>
 
                                 <div className="md:col-span-2 pt-6 border-t border-slate-100 mt-2">

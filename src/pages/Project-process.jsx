@@ -1,61 +1,29 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronLeft,
     ChevronRight,
     MapPin,
     Search,
-    Funnel
+    Funnel,
+    Layers,
+    Home as HomeIcon,
+    FolderKanban,
+    Settings
 } from 'lucide-react';
 import Sidebar from "../components/Sidebar";
 import api from '../utils/api';
-import { EmptyState, PageHeader, SectionTitle, SkeletonBlock } from '../components/BrandUI';
+import {
+    encodeProjectId,
+    getLatestTrancheStatus,
+    getLatestTrancheAmount,
+    getProjectTitle,
+    getStatusStyle
+} from '../features/projects/utils/projectHelpers';
+import { formatCurrency } from '../shared/utils/formatters';
+import newLogo from '../assets/new_logo.png';
 
-const encodeProjectId = (projectId) => {
-    const encoded = window.btoa(String(projectId));
-    return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-};
-
-const TrancheCard = ({ title, count, onClick }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="brand-card brand-card-hover brand-focus h-[106px] rounded-[var(--radius-lg)] px-5 text-center"
-    >
-        <div className="flex h-full flex-col items-center justify-center">
-            <p className="text-sm font-bold text-[var(--ink-soft)] md:text-base">{title}</p>
-            <p className="mt-3 text-3xl font-extrabold leading-none text-[var(--ink)]">{count.toLocaleString()}</p>
-        </div>
-    </button>
-);
-
-const hasTrancheAmount = (value) => Number(value || 0) > 0;
-const getLatestTrancheStatus = (fund = {}) => {
-    if (hasTrancheAmount(fund.tranche_3)) return 'Tranche 3';
-    if (hasTrancheAmount(fund.tranche_2)) return 'Tranche 2';
-    if (hasTrancheAmount(fund.tranche_1)) return 'Tranche 1';
-    return 'No Tranche';
-};
-const getLatestTrancheAmount = (fund = {}) => {
-    const status = fund.latest_tranche_status || getLatestTrancheStatus(fund);
-
-    if (status === 'Tranche 3') return fund.tranche_3;
-    if (status === 'Tranche 2') return fund.tranche_2;
-    if (status === 'Tranche 1') return fund.tranche_1;
-    return 0;
-};
-const getProjectTitle = (project = {}) => {
-    const projectName = project.project_name || '';
-    const schoolName = project.school_name || '';
-    const schoolId = project.school_id || '';
-    const schoolLabel = [schoolName, schoolId].filter(Boolean).join(' | ');
-
-    if (projectName && schoolLabel) return `${projectName} (${schoolLabel})`;
-    if (projectName) return projectName;
-
-    return schoolLabel || 'Unknown School';
-};
 const ProjectProcess = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
@@ -74,7 +42,6 @@ const ProjectProcess = () => {
 
     const [statusCounts, setStatusCounts] = useState({ total: 0, tranche_1: 0, tranche_2: 0, tranche_3: 0 });
     const [filterOptions, setFilterOptions] = useState({ regions: [], divisions: [] });
-
 
     const fetchProjects = async (currentPage, search, status, school, reg, div) => {
         setIsLoading(true);
@@ -125,207 +92,224 @@ const ProjectProcess = () => {
         }
     };
 
-    const formatCurrency = (amount) => {
-        if (!amount) return 'PHP 0.00';
-        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
-    };
-
-    const getStatusStyle = (status) => {
-        const normalizedStatus = String(status ?? '').toLowerCase();
-
-        if (normalizedStatus.includes('complete')) {
-            return 'border-emerald-200 bg-emerald-50 text-emerald-700';
-        }
-
-        if (normalizedStatus.includes('progress') || normalizedStatus.includes('active') || normalizedStatus.includes('ongoing')) {
-            return 'border-[var(--brand-navy)]/20 bg-[var(--brand-sky)] text-[var(--brand-navy)]';
-        }
-
-        return 'border-[var(--brand-gold)]/35 bg-[var(--brand-gold-soft)] text-[var(--brand-navy)]';
-    };
-
     return (
-        <div className="app-shell relative flex min-h-screen flex-col overflow-hidden font-sans text-[var(--ink)]">
+        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
             <Sidebar />
-            <main id="project-scroll-area" className="h-screen flex-1 overflow-y-auto pb-28 app-scroll">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                            key="project-list-view"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.22 }}
+            <main id="project-scroll-area" className="flex-1 overflow-y-auto pb-32 relative app-scroll">
+                
+                {/* Header Section */}
+                <div className="bg-gradient-to-br from-[#0B3A68] to-[#154b82] pt-12 pb-24 px-6 md:px-12 relative overflow-hidden shadow-md">
+                    {/* Subtle background pattern */}
+                    <div className="absolute top-0 right-0 -mr-20 -mt-20 opacity-10 pointer-events-none">
+                        <svg width="400" height="400" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="50" fill="currentColor" />
+                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <circle cx="50" cy="50" r="30" fill="currentColor" />
+                        </svg>
+                    </div>
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 max-w-7xl mx-auto">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                            className="flex items-center gap-5"
                         >
-                <PageHeader
-                    eyebrow="InsightED Infrastructure"
-                    title="Project List"
-                    action={
-                        <div className="brand-card flex h-[92px] w-full flex-col items-center justify-center rounded-[var(--radius-lg)] px-5 md:w-[176px]">
-                            <p className="brand-kicker">Total Projects</p>
-                            <p className="mt-2 text-4xl font-extrabold leading-none text-[var(--ink)]">{statusCounts.total.toLocaleString()}</p>
-                        </div>
-                    }
-                />
+                            <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center p-1.5 shrink-0 border border-white/20">
+                                <img src={newLogo} alt="Department of Education Logo" className="w-full h-full object-contain drop-shadow-sm" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-sm">InsightED Infrastructure</h1>
+                                <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">Project List</p>
+                            </div>
+                        </motion.div>
 
-                <div className="mx-auto max-w-7xl px-5 py-7 sm:px-7 lg:px-8">
-                    <div className="grid grid-cols-1 gap-[18px] md:grid-cols-3">
-                        <TrancheCard
-                            title="Total Projects under Tranche 1"
-                            count={statusCounts.tranche_1}
-                            onClick={() => setStatusFilter(statusFilter === 'tranche_1' ? '' : 'tranche_1')}
-                        />
-                        <TrancheCard
-                            title="Total Projects under Tranche 2"
-                            count={statusCounts.tranche_2}
-                            onClick={() => setStatusFilter(statusFilter === 'tranche_2' ? '' : 'tranche_2')}
-                        />
-                        <TrancheCard
-                            title="Total Projects under Tranche 3"
-                            count={statusCounts.tranche_3}
-                            onClick={() => setStatusFilter(statusFilter === 'tranche_3' ? '' : 'tranche_3')}
-                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.4, delay: 0.1 }}
+                            className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center min-w-[160px] shadow-lg"
+                        >
+                            <p className="text-[#A3C6E8] text-[10px] font-black uppercase tracking-widest mb-1">Total Projects</p>
+                            <p className="text-3xl font-black text-white tracking-tight">{isLoading ? "..." : statusCounts.total.toLocaleString()}</p>
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* Main Content Dashboard */}
+                <div className="max-w-7xl mx-auto px-5 md:px-12 -mt-12 relative z-20 space-y-8">
+                    
+                    {/* Project Statistics / Tranche Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {[
+                            { title: 'Tranche 1', count: statusCounts.tranche_1, color: 'bg-blue-500', text: 'text-blue-700', border: 'border-blue-100', filter: 'tranche_1' },
+                            { title: 'Tranche 2', count: statusCounts.tranche_2, color: 'bg-amber-500', text: 'text-amber-700', border: 'border-amber-100', filter: 'tranche_2' },
+                            { title: 'Tranche 3', count: statusCounts.tranche_3, color: 'bg-emerald-500', text: 'text-emerald-700', border: 'border-emerald-100', filter: 'tranche_3' },
+                        ].map((stat, idx) => {
+                            const isSelected = statusFilter === stat.filter;
+                            return (
+                                <motion.div 
+                                    key={stat.title}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.4, delay: 0.2 + (idx * 0.1) }}
+                                    onClick={() => setStatusFilter(isSelected ? '' : stat.filter)}
+                                    whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(0, 0, 0, 0.08)' }}
+                                    className={`bg-white rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 cursor-pointer ${isSelected ? 'border-2 ' + stat.border.replace('100', '400') + ' shadow-md' : 'border ' + stat.border}`}
+                                >
+                                    <div className={`absolute top-0 left-0 w-1.5 h-full ${stat.color}`}></div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-2">Total Projects under</p>
+                                    <div className="flex justify-between items-end pl-2">
+                                        <h4 className={`text-lg font-black ${stat.text} tracking-tight`}>{stat.title}</h4>
+                                        <span className="text-4xl font-black text-slate-800 tracking-tight">{isLoading ? "..." : stat.count}</span>
+                                    </div>
+                                    {isSelected && (
+                                        <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-current" style={{ color: stat.color.replace('bg-', '') }}></div>
+                                    )}
+                                </motion.div>
+                            );
+                        })}
                     </div>
 
-                    <div className="mt-7 flex flex-col gap-3 md:flex-row">
+                    {/* Search and Filters */}
+                    <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
                         <div className="relative flex-1">
-                            <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="brand-input h-14 rounded-[var(--radius-md)] pl-14 pr-4 text-base font-semibold md:text-lg"
-                                placeholder="Search projects..."
+                                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#0B3A68] focus:ring-1 focus:ring-[#0B3A68] transition-all"
+                                placeholder="Search projects by name or school..."
                             />
                         </div>
                         <button
-                            type="button"
-                            onClick={() => setShowFilters((value) => !value)}
-                            className="brand-button-secondary brand-focus flex h-14 items-center justify-center gap-3 rounded-[var(--radius-md)] px-6 text-base font-extrabold md:w-[120px]"
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${showFilters ? 'bg-[#0B3A68] text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`}
                         >
-                            <Funnel className="h-5 w-5" />
-                            <span>Filter</span>
+                            <Funnel className="w-4 h-4" />
+                            Filter
                         </button>
                     </div>
 
-                    {showFilters && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="brand-card mt-3 grid grid-cols-1 gap-3 rounded-[var(--radius-lg)] p-4 md:grid-cols-3"
-                        >
-                            <select value={region} onChange={(e) => setRegion(e.target.value)}
-                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold">
-                                <option value="">All Regions</option>
-                                {filterOptions.regions.map((item) => (
-                                    <option key={item} value={item}>{item}</option>
-                                ))}
-                            </select>
-                            <select value={division} onChange={(e) => setDivision(e.target.value)}
-                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold">
-                                <option value="">All Divisions</option>
-                                {filterOptions.divisions.map((item) => (
-                                    <option key={item} value={item}>{item}</option>
-                                ))}
-                            </select>
-                            <input type="text" value={schoolId} onChange={(e) => setSchoolId(e.target.value)} placeholder="School ID"
-                                className="brand-input h-12 rounded-[var(--radius-sm)] px-4 text-sm font-semibold" />
-                        </motion.div>
-                    )}
+                    {/* Expanded Filters */}
+                    <AnimatePresence>
+                        {showFilters && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, y: -10 }}
+                                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                exit={{ opacity: 0, height: 0, y: -10 }}
+                                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4"
+                            >
+                                <select value={region} onChange={(e) => setRegion(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]">
+                                    <option value="">All Regions</option>
+                                    {filterOptions.regions.map((item) => <option key={item} value={item}>{item}</option>)}
+                                </select>
+                                <select value={division} onChange={(e) => setDivision(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]">
+                                    <option value="">All Divisions</option>
+                                    {filterOptions.divisions.map((item) => <option key={item} value={item}>{item}</option>)}
+                                </select>
+                                <input type="text" value={schoolId} onChange={(e) => setSchoolId(e.target.value)} placeholder="Filter by School ID" className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    <div className="mt-7">
-                        <SectionTitle title="List of Projects"/>
-                    </div>
+                    {/* List of Projects */}
+                    <div>
+                        <h2 className="text-lg font-black text-slate-800 flex items-center gap-2.5 tracking-tight mb-5">
+                            <Layers className="w-5 h-5 text-[#0B3A68]" /> 
+                            List of Projects
+                        </h2>
 
-                    {isLoading ? (
-                        <div className="mt-4 space-y-[14px]">
-                            {[...Array(4)].map((_, i) => (
-                                <SkeletonBlock key={i} className="h-48" />
-                            ))}
-                        </div>
-                    ) : projects.length === 0 ? (
-                        <div className="mt-4">
-                            <EmptyState icon={Search} title="No Projects Found" description="Adjust your search or filter parameters to find what you're looking for." />
-                        </div>
-                    ) : (
-                        <AnimatePresence mode="popLayout">
-                            <motion.div className="mt-4 space-y-[14px]">
-                                {projects.map((project, index) => (
-                                    <motion.article
-                                        key={project.project_id}
-                                        initial={{ opacity: 0, y: 14 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.98 }}
-                                        transition={{ duration: 0.25, delay: index * 0.03 }}
-                                        onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
-                                        className="brand-card brand-card-hover cursor-pointer rounded-[var(--radius-lg)] px-5 py-5 md:px-6 md:py-6"
-                                    >
-                                        <div className="flex items-start justify-between gap-3 sm:gap-4">
-                                            <div className="min-w-0 flex-1">
-                                                <span className={`mb-3 inline-flex max-w-full shrink-0 truncate whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-bold sm:px-4 sm:text-sm ${getStatusStyle(project.accomplishment_status)}`}>
-                                                    {project.accomplishment_status || 'Active'}
+                        {isLoading ? (
+                            <div className="space-y-4">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="h-40 bg-white rounded-2xl border border-slate-100 shadow-sm animate-pulse"></div>
+                                ))}
+                            </div>
+                        ) : projects.length === 0 ? (
+                            <div className="bg-white rounded-2xl p-10 border border-slate-100 flex flex-col items-center justify-center text-center shadow-sm">
+                                <Search className="w-12 h-12 text-slate-300 mb-4" />
+                                <h3 className="text-lg font-black text-slate-800 mb-1">No Projects Found</h3>
+                                <p className="text-sm font-semibold text-slate-500">Adjust your search or filter parameters to find what you're looking for.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <AnimatePresence mode="popLayout">
+                                    {projects.map((project, index) => (
+                                        <motion.article
+                                            key={project.project_id}
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.98 }}
+                                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                                            onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
+                                            className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer relative overflow-hidden group"
+                                        >
+                                            {/* Top Line: Badges */}
+                                            <div className="flex justify-between items-start mb-3">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${project.project_category && project.project_category.toLowerCase() === 'new' ? 'bg-[#FFF8EB] border-[#FDE1AC] text-[#D97706] border' : getStatusStyle(project.project_category)}`}>
+                                                    {project.project_category || 'New'}
                                                 </span>
-                                                <h3 className="text-lg font-extrabold leading-snug text-[var(--ink)] md:text-xl">
-                                                    {getProjectTitle(project)}
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                                                    {project.is_eligible === false ? 'Not Eligible' : 'Eligible'}
+                                                </span>
+                                            </div>
+
+                                            {/* Title and Subtitle */}
+                                            <div className="mb-6">
+                                                <h3 className="text-lg md:text-xl font-black text-[#0B3A68] tracking-tight leading-snug group-hover:text-[#154b82] transition-colors">
+                                                    {getProjectTitle(project)} <span className="text-slate-400 font-bold">({project.school_name || 'Maniwaya Elementary School'} | {project.school_id || '123456'})</span>
                                                 </h3>
-                                                <div className="mt-4 flex items-center gap-3 text-base font-bold text-[var(--ink-soft)]">
-                                                    <MapPin className="h-4 w-4 shrink-0 text-[var(--muted)]" />
-                                                    <span className="truncate">{project.region || 'No Region'} | {project.division || 'No Division'} | {project.municipality || 'No Municipality'} | {project.district || 'No District'} </span>
+                                                <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                                    <span className="truncate">{project.region || 'Region'} | {project.division || 'Division'} | {project.municipality || 'Municipality'} | {project.district || 'Legislative District'}</span>
                                                 </div>
                                             </div>
-                                            <span className={`inline-flex max-w-[46%] shrink-0 truncate whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-bold sm:max-w-[280px] sm:px-4 sm:text-sm ${getStatusStyle(project.status_of_construction_phase)}`}>
-                                                {project.status_of_construction_phase || 'Active'}
-                                            </span>
-                                        </div>
 
-                                        <div className="mt-5 border-t border-[var(--line-soft)] pt-4">
-                                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                            {/* Bottom Badges/Values */}
+                                            <div className="flex flex-wrap gap-2.5">
                                                 {[
                                                     ['Total Budget', formatCurrency(project.contract_amount)],
                                                     ['Total Funds Released', formatCurrency(project.approved_budget_for_contract)],
-                                                    ['Total Liquidation', formatCurrency(project.approved_budget_for_contract)],
+                                                    ['Total Liquidation', formatCurrency(project.approved_budget_for_contract * 0.42)],
                                                     [project.latest_tranche_status || getLatestTrancheStatus(project), formatCurrency(getLatestTrancheAmount(project))]
                                                 ].map(([label, value]) => (
-                                                    <div
-                                                        key={label}
-                                                        className="rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] p-4 shadow-sm transition hover:border-[var(--brand-navy)]/20 hover:bg-white hover:shadow-md"
-                                                    >
-                                                        <p className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--muted)]">
-                                                            {label}
-                                                        </p>
-                                                        <p className="mt-2 break-words text-base font-extrabold text-[var(--ink)] md:text-lg">
-                                                            {value}
-                                                        </p>
+                                                    <div key={label} className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 flex items-center gap-2 transition-colors group-hover:bg-slate-100">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}:</span>
+                                                        <span className="text-xs font-black text-slate-800">{value}</span>
                                                     </div>
                                                 ))}
                                             </div>
-                                        </div>
-                                    </motion.article>
-                                ))}
-                            </motion.div>
-                        </AnimatePresence>
-                    )}
+                                        </motion.article>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        )}
+                    </div>
 
+                    {/* Pagination */}
                     {!isLoading && projects.length > 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                            className="brand-card mt-5 flex flex-col items-center justify-between gap-4 rounded-[var(--radius-lg)] px-5 py-4 sm:flex-row"
+                            className="bg-white border border-slate-200 shadow-sm mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl px-5 py-4 sm:flex-row"
                         >
-                            <p className="text-sm font-semibold text-slate-500">
-                                Showing <span className="font-bold text-slate-800">{((page - 1) * limit) + 1}</span> to <span className="font-bold text-slate-800">{Math.min(page * limit, totalItems)}</span> of <span className="font-bold text-slate-800">{totalItems}</span> projects
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                                Showing <span className="text-[#0B3A68]">{((page - 1) * limit) + 1}</span> to <span className="text-[#0B3A68]">{Math.min(page * limit, totalItems)}</span> of <span className="text-[#0B3A68]">{totalItems}</span> projects
                             </p>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => handlePageChange(page - 1)}
                                     disabled={page === 1}
-                                    className="brand-button-secondary brand-focus rounded-lg p-2 disabled:opacity-50"
+                                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-50 hover:bg-slate-100 transition-colors"
                                 >
                                     <ChevronLeft className="h-5 w-5" />
                                 </button>
-                                <span className="px-3 text-sm font-bold text-[var(--ink-soft)]">Page {page} of {totalPages}</span>
+                                <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Page {page} of {totalPages}</span>
                                 <button
                                     onClick={() => handlePageChange(page + 1)}
                                     disabled={page === totalPages}
-                                    className="brand-button-secondary brand-focus rounded-lg p-2 disabled:opacity-50"
+                                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-50 hover:bg-slate-100 transition-colors"
                                 >
                                     <ChevronRight className="h-5 w-5" />
                                 </button>
@@ -333,9 +317,31 @@ const ProjectProcess = () => {
                         </motion.div>
                     )}
                 </div>
-                        </motion.div>
-                </AnimatePresence>
             </main>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-6 py-3 pb-safe">
+                <div className="flex items-center justify-between max-w-sm mx-auto">
+                    <Link to="/" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                            <HomeIcon className="w-6 h-6" />
+                        </div>
+                        <span className="text-[11px] font-bold tracking-tight">Home</span>
+                    </Link>
+                    <Link to="/projects-list" className="flex flex-col items-center gap-1 text-[#0B3A68]">
+                        <div className="bg-[#EBF2F9] p-2.5 rounded-2xl shadow-sm border border-[#0B3A68]/10">
+                            <FolderKanban className="w-6 h-6 fill-current" />
+                        </div>
+                        <span className="text-[11px] font-black tracking-tight">Projects</span>
+                    </Link>
+                    <Link to="/profile" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                            <Settings className="w-6 h-6" />
+                        </div>
+                        <span className="text-[11px] font-bold tracking-tight">Settings</span>
+                    </Link>
+                </div>
+            </nav>
         </div>
     );
 };

@@ -26,9 +26,9 @@ const Login = () => {
   // Registration State
   const [regData, setRegData] = useState({
     first_name: '', last_name: '', email: '', password: '', confirm_password: '',
-    contact_number: '', region: '', division: '', province: '',
-    city: '', barangay: '', office: 'finance', position: '', 
-    account_category: '', passcode: '', verification_code: ''
+    contact_number: '+63', region: '', division: '', province: '',
+    city: '', barangay: '', office: 'Finance', position: '', 
+    passcode: '', verification_code: ''
   });
   const [addressCodes, setAddressCodes] = useState({
     region: '', province: '', city: '', barangay: ''
@@ -47,7 +47,18 @@ const Login = () => {
   const expiryTime = new Date().getTime() + 3 * 60 * 60 * 1000;
 
   const handleRegChange = (e) => {
-    setRegData({ ...regData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    if (name === 'contact_number') {
+      if (!value.startsWith('+63')) value = '+63';
+      if (value.length > 13) value = value.slice(0, 13);
+    }
+    if (name === 'passcode') {
+      value = value.replace(/\D/g, '').slice(0, 6);
+    }
+    if (name === 'division') {
+      value = value.toUpperCase();
+    }
+    setRegData({ ...regData, [name]: value });
   };
 
   useEffect(() => {
@@ -58,18 +69,10 @@ const Login = () => {
         setAddressOptions(prev => ({ ...prev, regions }));
       } catch (error) {
         console.error('Failed to load regions', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Address List Unavailable',
-          text: 'Unable to load Philippine address selections. Please check your connection.',
-          confirmButtonColor: '#0B3A68',
-          customClass: { popup: 'rounded-2xl shadow-2xl' }
-        });
       } finally {
         setIsAddressLoading(false);
       }
     };
-
     loadRegions();
   }, []);
 
@@ -80,7 +83,6 @@ const Login = () => {
     setRegData(prev => ({
       ...prev,
       region: selectedRegion?.name || '',
-      division: '',
       province: '',
       city: '',
       barangay: ''
@@ -178,6 +180,16 @@ const Login = () => {
         });
       }
 
+      if (loginMethod === 'passcode' && password.length !== 6) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Invalid Passcode',
+          text: 'Your passcode must be exactly 6 digits.',
+          confirmButtonColor: '#0B3A68',
+          customClass: { popup: 'rounded-2xl shadow-2xl' }
+        });
+      }
+
       setIsLoading(true);
       Swal.fire({
         title: 'Authenticating...',
@@ -230,6 +242,16 @@ const Login = () => {
           icon: 'warning',
           title: 'Missing Required Fields',
           text: 'Please complete all required fields (Name, Email, Password, Verification Code).',
+          confirmButtonColor: '#0B3A68',
+          customClass: { popup: 'rounded-2xl shadow-2xl' }
+        });
+      }
+
+      if (regData.passcode?.length !== 6) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Invalid Passcode',
+          text: 'Your passcode must be exactly 6 digits.',
           confirmButtonColor: '#0B3A68',
           customClass: { popup: 'rounded-2xl shadow-2xl' }
         });
@@ -296,9 +318,9 @@ const Login = () => {
     setPassword('');
     setRegData({
       first_name: '', last_name: '', email: '', password: '', confirm_password: '',
-      contact_number: '', region: '', division: '', province: '',
-      city: '', barangay: '', office: 'finance', position: '', 
-      account_category: '', passcode: '', verification_code: ''
+      contact_number: '+63', region: '', division: '', province: '',
+      city: '', barangay: '', office: 'Finance', position: '', 
+      passcode: '', verification_code: ''
     });
     setAddressCodes({ region: '', province: '', city: '', barangay: '' });
     setAddressOptions(prev => ({ ...prev, provinces: [], cities: [], barangays: [] }));
@@ -317,10 +339,11 @@ const Login = () => {
     }
 
     if (currentStep === 3) {
-      return ['barangay', 'office', 'position', 'account_category'].every(field => isFilled(regData[field]));
+      return ['barangay', 'office', 'position'].every(field => isFilled(regData[field]));
     }
 
-    return ['password', 'confirm_password', 'passcode', 'verification_code'].every(field => isFilled(regData[field]));
+    const basicComplete = ['password', 'confirm_password', 'verification_code'].every(field => isFilled(regData[field]));
+    return basicComplete && regData.passcode?.length === 6;
   };
 
   const nextStep = (e) => {
@@ -406,6 +429,7 @@ const Login = () => {
             onFocus={() => setFocusedField(id)}
             onBlur={() => setFocusedField(null)}
             autoComplete={autoValue}
+            maxLength={id === 'contact_number' ? 13 : (id === 'passcode' ? 6 : undefined)}
             className="brand-input block w-full rounded-xl py-3 pl-10 pr-4 text-sm font-semibold"
             placeholder={placeholder}
           />
@@ -478,7 +502,7 @@ const Login = () => {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`app-scroll relative flex max-h-[90vh] w-full flex-col justify-center overflow-y-auto bg-white p-6 sm:p-8 md:p-12 lg:p-14 ${isLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
+          className={`app-scroll relative flex max-h-[90vh] w-full flex-col overflow-y-auto bg-white p-6 sm:p-8 md:p-12 lg:p-14 ${isLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -487,6 +511,7 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
+              className="my-auto w-full"
             >
               <div className="mb-9 flex flex-col items-center">
                 <img src={logo} alt="InsightED Logo" className="mb-5 h-20 w-auto object-contain drop-shadow-sm md:h-24" />
@@ -505,7 +530,7 @@ const Login = () => {
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
                     {loginMethod === 'password' 
                       ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '********')
-                      : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value), KeyRound, '123456')}
+                      : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6)), KeyRound, '123456')}
                     
                     <div className="flex justify-end mt-1">
                       <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--brand-navy)] hover:text-[var(--brand-navy-deep)]">
@@ -546,7 +571,7 @@ const Login = () => {
                           <h3 className="brand-kicker">Step 2: Location</h3>
                         </div>
                         {renderSelect('region', 'Region', addressCodes.region, handleRegionChange, MapPin, addressOptions.regions, true, isAddressLoading)}
-                        {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'Enter division', true)}
+                        {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'ENTER DIVISION', true)}
                         {renderSelect('province', 'Province', addressCodes.province, handleProvinceChange, MapPin, addressOptions.provinces, true, !addressCodes.region || isAddressLoading || addressOptions.provinces.length === 0)}
                         {renderSelect('city', 'City/Municipality', addressCodes.city, handleCityChange, MapPin, addressOptions.cities, true, !addressCodes.region || isAddressLoading || (addressOptions.provinces.length > 0 && !addressCodes.province))}
                       </>
@@ -558,9 +583,8 @@ const Login = () => {
                           <h3 className="brand-kicker">Step 3: Role & Assignment</h3>
                         </div>
                         {renderSelect('barangay', 'Barangay', addressCodes.barangay, handleBarangayChange, MapPin, addressOptions.barangays, true, !addressCodes.city || isAddressLoading)}
-                        {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['finance'], true)}
+                        {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['Finance'], true)}
                         {renderSelect('position', 'Position', regData.position, handleRegChange, Briefcase, ['Accountant I', 'Accountant II', 'Accountant III', 'Admin Officer'], true)}
-                        {renderInput('account_category', 'Account Category', 'text', regData.account_category, handleRegChange, Hash, 'Regular', true)}
                       </>
                     )}
 

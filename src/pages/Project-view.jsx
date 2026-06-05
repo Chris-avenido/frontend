@@ -21,123 +21,71 @@ import newLogo from '../assets/new_logo.png';
 import { EmptyState, SkeletonBlock } from '../components/BrandUI';
 
 const InfoCard = ({ title, icon: Icon, rows }) => (
-    <section className="rounded-[20px] border border-[var(--line)] bg-white p-6 shadow-[0_2px_8px_rgba(13,45,88,0.10)]">
-        <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--brand-sky)] text-[var(--brand-navy)]">
-                <Icon className="h-4 w-4" />
+    <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+    >
+        <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+        <div className="mb-6 flex items-center gap-3 relative z-10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EBF2F9] text-[#0B3A68] shadow-sm border border-[#0B3A68]/10">
+                <Icon className="h-6 w-6" />
             </div>
-            <h2 className="text-base font-extrabold text-[var(--ink)]">{title}</h2>
+            <h2 className="text-lg font-black text-[#0B3A68] tracking-tight">{title}</h2>
         </div>
-        <div>
+        <div className="relative z-10 space-y-4">
             {rows.map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-6 border-b border-[var(--line-soft)] py-3 last:border-b-0">
-                    <span className="text-sm font-medium text-[var(--ink-soft)]">{label}</span>
-                    <span className="text-right text-sm font-extrabold text-[var(--ink)]">{value || 'N/A'}</span>
+                <div key={label} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+                    <span className="text-sm font-black text-slate-800 text-left sm:text-right">{value || 'N/A'}</span>
                 </div>
             ))}
         </div>
-    </section>
+    </motion.section>
 );
 
 const clampPercent = (value) => Math.min(Math.max(Number(value || 0), 0), 100);
 
-const FundProgressBar = ({ value }) => (
-    <div className="fund-modal-progress" aria-label={`${value}% complete`}>
-        <span style={{ width: `${clampPercent(value)}%` }} />
-    </div>
-);
-
 const displayOrDash = (value) => value || '-';
-
-const FundTranchePanel = ({ title, trancheValue, liquidationValue, locked = false }) => (
-    <section className="fund-modal-panel">
-        <div className="fund-modal-panel-title">
-            <h4>{title}</h4>
-            <span className={locked ? 'is-locked' : 'is-open'}>
-                {locked ? 'Locked' : 'Open'}
-            </span>
-        </div>
-        <label>{title}</label>
-        <div className={`fund-modal-field ${locked ? 'is-locked' : ''}`}>
-            {locked ? 'LOCKED' : `${trancheValue}% ready`}
-        </div>
-        <label>Liquidation</label>
-        <div className={`fund-modal-field ${locked ? 'is-locked' : ''}`}>
-            {locked ? 'LOCKED' : `${liquidationValue}% submitted`}
-        </div>
-    </section>
-);
-
-const FundSummaryPanel = ({ tranches }) => (
-    <section className="fund-modal-panel">
-        <div className="fund-modal-panel-title">
-            <h4>Summary</h4>
-            <BarChart3Icon />
-        </div>
-        <div className="fund-modal-summary-list">
-            {tranches.map((item) => (
-                <div className="fund-modal-summary-row" key={item.label}>
-                    <div>
-                        <span>{item.label}</span>
-                        <strong>{item.value}%</strong>
-                    </div>
-                    <FundProgressBar value={item.value} />
-                </div>
-            ))}
-        </div>
-    </section>
-);
-
-const BarChart3Icon = () => (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-        <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-);
-
-const trancheStatusLabels = {
-    0: 'New',
-    1: 'Tranche 1 Released',
-    2: 'Tranche 2 Released',
-    3: 'Tranche 3 Released',
-    4: 'Completed'
-};
-
-const getTrancheStatusLabel = (flag) => trancheStatusLabels[Number(flag || 0)] || 'New';
 const hasTrancheAmount = (value) => Number(value || 0) > 0;
-const TrancheManagementModal = ({ isOpen, onClose, project, trancheFund, onSaved, formatCurrency }) => {
-    const [formData, setFormData] = useState(() => ({
-        tranche_1: trancheFund?.tranche_1 || '',
-        tranche_2: trancheFund?.tranche_2 || '',
-        tranche_3: trancheFund?.tranche_3 || '',
-        tranche_flag: trancheFund?.tranche_flag || 0,
-        remarks: trancheFund?.remarks || ''
-    }));
+
+const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSaved, formatCurrency }) => {
+    const [formData, setFormData] = useState({
+        tranche_1: '',
+        tranche_2: '',
+        tranche_3: ''
+    });
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        if (!isOpen) return undefined;
+        if (trancheFund) {
+            setFormData({
+                tranche_1: trancheFund.tranche_1 || '',
+                tranche_2: trancheFund.tranche_2 || '',
+                tranche_3: trancheFund.tranche_3 || ''
+            });
+        }
+    }, [trancheFund, isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) return undefined;
         const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
         const handleKeyDown = (event) => {
             if (event.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handleKeyDown);
-
         return () => {
             document.body.style.overflow = originalOverflow;
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
-
     const tranche1Released = hasTrancheAmount(formData.tranche_1);
     const tranche2Released = hasTrancheAmount(formData.tranche_2);
-    const tranche3Released = hasTrancheAmount(formData.tranche_3);
     const tranche2Enabled = tranche1Released;
     const tranche3Enabled = tranche1Released && tranche2Released;
-    const currentFlag = tranche1Released && tranche2Released && tranche3Released ? 4 : tranche1Released && tranche2Released ? 2 : tranche1Released ? 1 : 0;
 
     const updateAmount = (field, value) => {
         if (value !== '' && !/^\d*\.?\d{0,2}$/.test(value)) return;
@@ -158,7 +106,6 @@ const TrancheManagementModal = ({ isOpen, onClose, project, trancheFund, onSaved
         if (hasTrancheAmount(formData.tranche_2) && !hasTrancheAmount(formData.tranche_1)) {
             return Swal.fire({ icon: 'warning', title: 'Tranche 1 Required', text: 'Release Tranche 1 before Tranche 2.', confirmButtonColor: '#0B3A68' });
         }
-
         if (hasTrancheAmount(formData.tranche_3) && !hasTrancheAmount(formData.tranche_2)) {
             return Swal.fire({ icon: 'warning', title: 'Tranche 2 Required', text: 'Release Tranche 2 before Tranche 3.', confirmButtonColor: '#0B3A68' });
         }
@@ -173,12 +120,11 @@ const TrancheManagementModal = ({ isOpen, onClose, project, trancheFund, onSaved
                     tranche_1: formData.tranche_1 || 0,
                     tranche_2: formData.tranche_2 || 0,
                     tranche_3: formData.tranche_3 || 0,
-                    remarks: formData.remarks,
                     user_id: Number.isFinite(numericUserId) ? numericUserId : 0
                 })
             });
 
-            onSaved(response.data);
+            if (onSaved) onSaved(response.data);
             Swal.fire({
                 icon: 'success',
                 title: 'Tranches Updated',
@@ -200,134 +146,20 @@ const TrancheManagementModal = ({ isOpen, onClose, project, trancheFund, onSaved
     };
 
     const trancheSteps = [
-        { key: 'tranche_1', title: 'Tranche 1', enabled: true, released: tranche1Released },
-        { key: 'tranche_2', title: 'Tranche 2', enabled: tranche2Enabled, released: tranche2Released },
-        { key: 'tranche_3', title: 'Tranche 3', enabled: tranche3Enabled, released: tranche3Released }
+        { key: 'tranche_1', title: 'Tranche 1', enabled: true, requirementText: 'Reach 50% to be eligible for Tranche 2' },
+        { key: 'tranche_2', title: 'Tranche 2', enabled: tranche2Enabled, requirementText: 'Reach 80% to be eligible for Tranche 3' },
+        { key: 'tranche_3', title: 'Tranche 3', enabled: tranche3Enabled, requirementText: '' }
     ];
 
-    return (
-        <AnimatePresence>
-            <motion.div
-                className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/78 px-4 py-6 backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onMouseDown={onClose}
-                role="presentation"
-            >
-                <motion.dialog
-                    open
-                    aria-modal="true"
-                    aria-label="Manage project tranches"
-                    className="m-0 max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-[24px] border border-white/20 bg-white p-0 text-left shadow-2xl"
-                    initial={{ opacity: 0, y: 18, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 12, scale: 0.98 }}
-                    onMouseDown={(event) => event.stopPropagation()}
-                >
-                    <div className="app-scroll max-h-[92vh] overflow-y-auto">
-                        <header className="flex flex-col gap-4 border-b border-[var(--line)] bg-[var(--brand-navy)] px-6 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
-                            <div className="min-w-0">
-                                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--brand-gold)]">Tranche Management</p>
-                                <h2 className="mt-2 truncate text-2xl font-extrabold">{project.project_name || 'Project Fund Release'}</h2>
-                            </div>
-                            <button type="button" onClick={onClose} className="brand-focus flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Close tranche manager">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </header>
+    const calcPerc = (amount) => {
+        if (!amount || !budget || budget <= 0) return 0;
+        return clampPercent((Number(amount) / budget) * 100);
+    };
 
-                        <div className="space-y-5 p-5 sm:p-6">
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <p className="text-sm font-bold text-[var(--ink-soft)]">Sequential release workflow</p>
-                                    <p className="mt-1 text-sm font-medium text-[var(--muted)]">Tranche 2 and Tranche 3 unlock only after the previous tranche has a valid amount.</p>
-                                </div>
-                                <span className="w-fit rounded-lg border border-[var(--brand-gold)]/40 bg-[var(--brand-gold-soft)] px-4 py-2 text-sm font-extrabold text-[var(--brand-navy)]">
-                                    {getTrancheStatusLabel(currentFlag)}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                {trancheSteps.map(({ key, title, enabled, released }) => (
-                                    <section
-                                        key={key}
-                                        className={`rounded-xl border p-4 shadow-sm transition ${enabled ? 'border-[var(--line)] bg-white' : 'border-slate-200 bg-slate-50 opacity-60'}`}
-                                    >
-                                        <div className="mb-4 flex items-center justify-between gap-3">
-                                            <h3 className="font-extrabold text-[var(--ink)]">{title}</h3>
-                                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${released ? 'bg-emerald-100 text-emerald-700' : enabled ? 'bg-[var(--brand-gold-soft)] text-[var(--brand-navy)]' : 'bg-slate-200 text-slate-500'}`}>
-                                                {released ? 'Released' : enabled ? 'Open' : 'Locked'}
-                                            </span>
-                                        </div>
-                                        <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--muted)]">Release Amount</label>
-                                        <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            value={formData[key]}
-                                            onChange={(event) => updateAmount(key, event.target.value)}
-                                            disabled={!enabled}
-                                            placeholder={enabled ? '0.00' : 'Locked'}
-                                            className="brand-input mt-2 h-12 rounded-xl px-4 text-base font-extrabold disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-                                        />
-                                        <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
-                                            {released ? formatCurrency(formData[key]) : enabled ? 'Ready for release' : 'Complete the previous tranche first'}
-                                        </p>
-                                    </section>
-                                ))}
-                            </div>
-
-                            <div className="rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] p-4">
-                                <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--muted)]">Remarks</label>
-                                <textarea
-                                    value={formData.remarks}
-                                    onChange={(event) => setFormData((prev) => ({ ...prev, remarks: event.target.value }))}
-                                    rows="3"
-                                    className="brand-input mt-2 min-h-24 rounded-xl p-4 text-sm font-semibold"
-                                    placeholder="Optional release notes"
-                                />
-                            </div>
-
-                            <footer className="flex flex-col-reverse gap-3 border-t border-[var(--line-soft)] pt-5 sm:flex-row sm:justify-end">
-                                <button type="button" onClick={onClose} className="brand-button-secondary brand-focus rounded-xl px-6 py-3 font-extrabold">
-                                    Cancel
-                                </button>
-                                <button type="button" onClick={handleSave} disabled={isSaving} className="brand-button-primary brand-focus rounded-xl px-6 py-3 font-extrabold disabled:opacity-60">
-                                    {isSaving ? 'Saving...' : 'Save Tranches'}
-                                </button>
-                            </footer>
-                        </div>
-                    </div>
-                </motion.dialog>
-            </motion.div>
-        </AnimatePresence>
-    );
-};
-
-const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgress }) => {
-    useEffect(() => {
-        if (!isOpen) return undefined;
-
-        const originalOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') onClose();
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            document.body.style.overflow = originalOverflow;
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [isOpen, onClose]);
-
-    const certValue = clampPercent(certificateProgress);
-    const liquidationValue = clampPercent(certValue >= 50 ? certValue - 20 : 0);
-    const tranches = [
-        { label: 'Tranche 1', value: clampPercent(certValue + 5) },
-        { label: 'Tranche 2', value: certValue >= 50 ? liquidationValue : 0 },
-        { label: 'Tranche 3', value: certValue >= 80 ? clampPercent(certValue - 60) : 0 }
+    const summaryTranches = [
+        { label: 'Tranche 1', value: calcPerc(formData.tranche_1) },
+        { label: 'Tranche 2', value: calcPerc(formData.tranche_2) },
+        { label: 'Tranche 3', value: calcPerc(formData.tranche_3) }
     ];
 
     return (
@@ -342,66 +174,155 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgre
                     onMouseDown={onClose}
                     role="presentation"
                 >
-                    <motion.dialog
-                        open
+                    <motion.div
+                        role="dialog"
                         aria-modal="true"
                         aria-label="Fund download workflow"
-                        className="fund-download-modal"
+                        className="m-0 max-h-[96vh] w-full max-w-4xl overflow-hidden rounded-[24px] border border-white/20 bg-white p-0 text-left shadow-2xl flex flex-col"
                         initial={{ opacity: 0, y: 18, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 12, scale: 0.98 }}
                         transition={{ duration: 0.22, ease: 'easeOut' }}
                         onMouseDown={(event) => event.stopPropagation()}
                     >
-                        <div className="fund-modal-body app-scroll">
-                            <header className="fund-modal-header">
-                                <div>
-                                    <p>InsightED Infrastructure</p>
-                                    <h2>Fund Management</h2>
-                                </div>
-                                <div className="fund-modal-header-actions">
-                                    <span>Review Details</span>
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="fund-modal-close brand-focus"
-                                        aria-label="Close fund download workflow"
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
-                            </header>
-
-                            <section className="fund-modal-project-card">
-                                <h3>{project.project_name || 'Construction of 1STY2CL'}</h3>
-                                <p>{project.school_name} | {project.school_id }</p>
-                            </section>
-
-                            <section className="fund-modal-total-card">
-                                <div className="fund-modal-total">
-                                    <span>Total Fund:</span>
-                                    <strong>{new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(budget)}</strong>
-                                </div>
-                                <div className="fund-modal-meta">
-                                    <p>Contractor: <strong>{displayOrDash(project.contractor_name)}</strong></p>
-                                    <p>PCAB License: <strong>{displayOrDash(project.pcab_license_number)}</strong></p>
-                                </div>
-                            </section>
-
-                            <section className="fund-modal-work-grid">
-                                <FundTranchePanel title="Tranche 1" trancheValue={tranches[0].value} liquidationValue={tranches[0].value} />
-                                <FundTranchePanel title="Tranche 2" trancheValue={tranches[1].value} liquidationValue={tranches[1].value} locked={certValue < 50} />
-                                <FundTranchePanel title="Tranche 3" trancheValue={tranches[2].value} liquidationValue={tranches[2].value} locked={certValue < 80} />
-                                <FundSummaryPanel tranches={tranches} />
-                            </section>
-
-                            <footer className="fund-modal-actions">
-                                <button type="button" className="brand-button-primary brand-focus" onClick={onClose}>
-                                    Close
+                        <header className="flex flex-col gap-1 border-b border-slate-100 bg-white px-8 py-6 shrink-0 relative z-20">
+                            <p className="text-sm font-bold text-slate-500 tracking-tight">InsightED Infrastructure</p>
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-black text-[#0B3A68]">Fund Management</h2>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="brand-focus flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                    aria-label="Close fund download workflow"
+                                >
+                                    <X className="h-5 w-5" />
                                 </button>
-                            </footer>
+                            </div>
+                        </header>
+
+                        <div className="app-scroll overflow-y-auto p-6 md:p-8 flex-1 bg-[#F8FAFC]">
+                            <div className="mx-auto max-w-4xl space-y-6">
+                                
+                                {/* Project Info Pill */}
+                                <div className="flex justify-center">
+                                    <div className="bg-white rounded-full border border-slate-200 shadow-sm px-8 py-4 text-center">
+                                        <h3 className="text-sm md:text-base font-black text-[#0B3A68] tracking-tight">{project.project_name || 'Construction of 1STY2CL'}</h3>
+                                        <p className="mt-0.5 text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">{project.school_name} | {project.school_id}</p>
+                                    </div>
+                                </div>
+
+                                {/* Total Fund Box */}
+                                <section className="bg-white rounded-3xl border border-slate-200 shadow-sm px-6 py-8 md:px-10 md:py-10 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#EBF2F9] rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                                    
+                                    <div className="flex flex-col items-center justify-center mb-8 md:mb-10 relative z-10">
+                                        <div className="flex items-baseline gap-3 md:gap-4">
+                                            <span className="text-xl md:text-2xl font-bold text-slate-500">Total Fund:</span>
+                                            <span className="text-4xl md:text-5xl lg:text-[56px] font-black text-[#0B3A68] tracking-tight leading-none">
+                                                {new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(budget)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs md:text-sm font-bold text-slate-500 relative z-10">
+                                        <p>Contractor: <span className="text-slate-800 font-black">{displayOrDash(project.contractor_name)}</span></p>
+                                        <p>PCAB License: <span className="text-slate-800 font-black">{displayOrDash(project.pcab_license_number)}</span></p>
+                                    </div>
+                                </section>
+
+                                {/* 2x2 Grid for Tranches & Summary */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {trancheSteps.map(({ key, title, enabled, requirementText }) => (
+                                        <section key={key} className={`bg-white rounded-3xl border ${enabled ? 'border-slate-200 shadow-sm' : 'border-slate-100 opacity-70'} p-6 relative`}>
+                                            
+                                            {/* Top Right Badges */}
+                                            <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
+                                                {/* Liquidation Percentage Box */}
+                                                <div className="flex items-center gap-2 border border-slate-200 rounded-xl pl-3 pr-2 py-1.5 bg-slate-50 shadow-sm">
+                                                    <span className="text-[8px] font-black text-slate-400 leading-[1.1] uppercase tracking-widest text-right w-16">Liquidation Percentage</span>
+                                                    <div className="bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-[#0B3A68] text-base md:text-lg min-w-[50px] md:min-w-[60px] text-center shadow-sm">
+                                                        {enabled ? '15%' : ''}
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Eligibility Pill */}
+                                                {requirementText && (
+                                                    <div className="border border-slate-200 rounded-full px-3 py-1 bg-white shadow-sm">
+                                                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                                                            {requirementText}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Tranche Content */}
+                                            <div className="pt-2">
+                                                <h4 className="text-lg font-black text-[#0B3A68] mb-12">{title}</h4>
+                                                
+                                                <div className="space-y-5">
+                                                    <div>
+                                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">{title}</label>
+                                                        {enabled ? (
+                                                            <input
+                                                                type="text"
+                                                                inputMode="decimal"
+                                                                value={formData[key]}
+                                                                onChange={(e) => updateAmount(key, e.target.value)}
+                                                                className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm"
+                                                                placeholder="Enter amount..."
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                LOCKED
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidation</label>
+                                                        {enabled ? (
+                                                            <div className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 flex items-center text-sm font-black text-slate-600 shadow-inner">
+                                                                {formData[key] ? formatCurrency(Number(formData[key]) * 0.15) : '0.00'}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                LOCKED
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    ))}
+
+                                    <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col">
+                                        <h4 className="text-lg font-black text-[#0B3A68] mb-6">Summary</h4>
+                                        <div className="space-y-6 flex-1 flex flex-col justify-center bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                                            {summaryTranches.map((item) => (
+                                                <div key={item.label}>
+                                                    <div className="flex justify-between items-end mb-2">
+                                                        <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{item.label}</span>
+                                                        <span className="text-sm font-black text-[#0B3A68]">{item.value.toFixed(0)}%</span>
+                                                    </div>
+                                                    <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner">
+                                                        <div className="h-full bg-gradient-to-r from-[#0B3A68] to-[#154b82] transition-all duration-500 ease-out" style={{ width: `${item.value}%` }}></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
                         </div>
-                    </motion.dialog>
+
+                        <footer className="border-t border-slate-100 bg-white px-8 py-5 flex justify-end gap-3 shrink-0 relative z-20">
+                            <button type="button" onClick={onClose} className="h-12 px-6 rounded-xl font-bold text-sm bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="button" onClick={handleSave} disabled={isSaving} className="h-12 px-8 rounded-xl font-black text-sm bg-[#0B3A68] text-white shadow-md hover:bg-[#154b82] transition-colors disabled:opacity-60 disabled:hover:bg-[#0B3A68]">
+                                {isSaving ? 'Saving...' : 'Save Updates'}
+                            </button>
+                        </footer>
+                    </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>
@@ -410,7 +331,6 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, certificateProgre
 
 const ProjectDetailView = ({ project, onBack }) => {
     const [isFundModalOpen, setIsFundModalOpen] = useState(false);
-    const [isTrancheModalOpen, setIsTrancheModalOpen] = useState(false);
     const [trancheFund, setTrancheFund] = useState(null);
 
     const formatCurrency = (amount) => {
@@ -438,74 +358,99 @@ const ProjectDetailView = ({ project, onBack }) => {
     }, [project.project_id]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="min-h-screen bg-[#f4f9fd] pb-32"
-        >
-            <header className="h-auto border-b border-[var(--line)] bg-[#f7fbff] md:h-[65px]">
-                <div className="mx-auto flex max-w-[1490px] flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between md:py-0">
-                    <div className="flex items-center gap-4">
+        <div className="pb-32">
+            {/* Header Section */}
+            <div className="bg-gradient-to-br from-[#0B3A68] to-[#154b82] pt-12 pb-24 px-6 md:px-12 relative overflow-hidden shadow-md">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 opacity-10 pointer-events-none">
+                    <svg width="400" height="400" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="50" fill="currentColor" />
+                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+                        <circle cx="50" cy="50" r="30" fill="currentColor" />
+                    </svg>
+                </div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 max-w-7xl mx-auto">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-4"
+                    >
                         <button
                             type="button"
                             onClick={onBack}
-                            className="brand-focus flex h-9 w-9 items-center justify-center rounded-full bg-[var(--brand-gold-soft)] text-[var(--brand-navy)] transition hover:bg-[var(--brand-gold)]/30"
+                            className="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors backdrop-blur-sm border border-white/20 shrink-0"
                             aria-label="Back to project list"
                         >
-                            <ArrowLeft className="h-4 w-4" />
+                            <ArrowLeft className="w-5 h-5" />
                         </button>
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white">
-                            <img src={newLogo} alt="InsightED logo" className="h-9 w-9 object-contain" />
+                        <div className="w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center p-1.5 shrink-0 border border-white/20">
+                            <img src={newLogo} alt="InsightED logo" className="w-full h-full object-contain drop-shadow-sm" />
                         </div>
                         <div>
-                            <h1 className="text-base font-extrabold text-[var(--ink)]">InsightED Infrastructure</h1>
-                            <p className="mt-1 text-xs font-medium text-[var(--muted)]">Project View</p>
+                            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-sm">InsightED Infrastructure</h1>
+                            <p className="text-[#A3C6E8] font-bold text-xs md:text-sm mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">Project View</p>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold text-emerald-800 shadow-sm">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Eligible
-                    </div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 rounded-2xl py-3 px-6 flex items-center gap-3 shadow-lg self-start md:self-auto"
+                    >
+                        <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+                        <span className="text-emerald-50 font-black tracking-widest uppercase text-sm">Eligible</span>
+                    </motion.div>
                 </div>
-            </header>
+            </div>
 
-            <div className="mx-auto max-w-[1140px] px-5 py-[30px]">
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_264px]">
-                    <section className="rounded-[20px] border border-[var(--line)] bg-white px-5 py-5 shadow-[0_2px_8px_rgba(13,45,88,0.10)]">
-                        <p className="mb-2 text-xs font-medium uppercase tracking-[0.12em] text-[var(--ink-soft)]">Project</p>
-                        <h2 className="text-lg font-extrabold text-[var(--ink)]">{project.project_name || 'Construction of 1STY2CL'}</h2>
-                        <p className="mt-2 text-sm font-medium text-[var(--ink-soft)]">
-                            {project.school_name || 'Mariwaya Elementary School'} · {project.school_id || '123456'}
-                        </p>
-                    </section>
+            <div className="max-w-7xl mx-auto px-5 md:px-12 -mt-12 relative z-20 space-y-6">
+                
+                {/* Top Row: Project Info & Actions */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5">
+                    <motion.section 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#EBF2F9] to-transparent rounded-bl-full -mr-8 -mt-8 opacity-60 pointer-events-none"></div>
+                        <h2 className="text-xl md:text-2xl font-black text-[#0B3A68] tracking-tight leading-snug relative z-10">
+                            {project.project_name || 'Construction of 1STY2CL'}
+                        </h2>
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest relative z-10">
+                            <School className="w-4 h-4 text-slate-400" />
+                            <span>{project.school_name || 'Maniwaya Elementary School'}</span>
+                            <span className="text-slate-300">|</span>
+                            <span className="text-slate-400">{project.school_id || '123456'}</span>
+                        </div>
+                    </motion.section>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        <button className="brand-focus flex h-[90px] flex-col items-center justify-center rounded-[20px] border border-[#b9c8dc] bg-white text-[var(--brand-navy)] shadow-[0_2px_8px_rgba(13,45,88,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(13,45,88,0.12)]">
-                            <FileText className="mb-2 h-5 w-5" />
-                            <span className="text-sm font-extrabold">View MOA</span>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex gap-4"
+                    >
+                        <button className="flex-1 lg:w-[150px] flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-[#0B3A68]/30 hover:shadow-md transition-all group p-5">
+                            <div className="w-12 h-12 rounded-2xl bg-[#EBF2F9] text-[#0B3A68] flex items-center justify-center mb-3 group-hover:bg-[#0B3A68] group-hover:text-white transition-colors shadow-sm">
+                                <FileText className="w-6 h-6" />
+                            </div>
+                            <span className="text-[11px] font-black text-slate-700 tracking-widest uppercase">View MOA</span>
                         </button>
-                        <button
+                        <button 
                             type="button"
                             onClick={() => setIsFundModalOpen(true)}
-                            className="brand-focus flex h-[90px] flex-col items-center justify-center rounded-[20px] border border-[var(--brand-gold)] bg-white text-amber-800 shadow-[0_2px_8px_rgba(239,173,36,0.14)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(239,173,36,0.20)]"
+                            className="flex-1 lg:w-[150px] flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-[#8A1538]/30 hover:shadow-md transition-all group p-5"
                         >
-                            <Download className="mb-2 h-5 w-5" />
-                            <span className="text-sm font-extrabold">Fund Download</span>
+                            <div className="w-12 h-12 rounded-2xl bg-[#FDF0F2] text-[#8A1538] flex items-center justify-center mb-3 group-hover:bg-[#8A1538] group-hover:text-white transition-colors shadow-sm">
+                                <Download className="w-6 h-6" />
+                            </div>
+                            <span className="text-[11px] font-black text-slate-700 tracking-widest uppercase text-center">Fund Download</span>
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsTrancheModalOpen(true)}
-                            className="brand-focus flex h-[90px] flex-col items-center justify-center rounded-[20px] border border-[var(--brand-navy)]/20 bg-white text-[var(--brand-navy)] shadow-[0_2px_8px_rgba(13,45,88,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--brand-gold)] hover:shadow-[0_8px_20px_rgba(13,45,88,0.12)]"
-                        >
-                            <WalletCards className="mb-2 h-5 w-5" />
-                            <span className="text-sm font-extrabold">Manage Tranches</span>
-                        </button>
-                    </div>
+                    </motion.div>
                 </div>
 
-                <div className="mt-[22px] grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {/* 2x2 Grid of Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InfoCard
                         title="Project Location Data"
                         icon={MapPin}
@@ -558,22 +503,13 @@ const ProjectDetailView = ({ project, onBack }) => {
                 onClose={() => setIsFundModalOpen(false)}
                 project={project}
                 budget={budget}
-                certificateProgress={project.accomplishment_percentage || 15}
+                trancheFund={trancheFund}
+                onSaved={setTrancheFund}
+                formatCurrency={formatCurrency}
             />
-            {isTrancheModalOpen && (
-                <TrancheManagementModal
-                    isOpen={isTrancheModalOpen}
-                    onClose={() => setIsTrancheModalOpen(false)}
-                    project={project}
-                    trancheFund={trancheFund}
-                    onSaved={setTrancheFund}
-                    formatCurrency={formatCurrency}
-                />
-            )}
-        </motion.div>
+        </div>
     );
 };
-
 
 export const ProjectView = () => {
     const navigate = useNavigate();
@@ -602,9 +538,9 @@ export const ProjectView = () => {
     }, [projectToken]);
 
     return (
-        <div className="app-shell relative flex min-h-screen flex-col overflow-hidden font-sans text-[var(--ink)]">
+        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
             <Sidebar />
-            <main className="h-screen flex-1 overflow-y-auto app-scroll">
+            <main className="flex-1 overflow-y-auto app-scroll relative">
                 <AnimatePresence mode="wait">
                     {project ? (
                         <ProjectDetailView project={project} onBack={() => navigate('/projects-list')} />
@@ -614,10 +550,16 @@ export const ProjectView = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="mx-auto max-w-3xl px-5 py-12"
+                            className="mx-auto max-w-3xl px-5 py-12 flex justify-center items-center h-full"
                         >
                             {isLoading ? (
-                                <SkeletonBlock className="h-64" />
+                                <div className="w-full space-y-6">
+                                    <SkeletonBlock className="h-40 rounded-2xl" />
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <SkeletonBlock className="h-64 rounded-2xl" />
+                                        <SkeletonBlock className="h-64 rounded-2xl" />
+                                    </div>
+                                </div>
                             ) : (
                                 <EmptyState
                                     icon={Search}
