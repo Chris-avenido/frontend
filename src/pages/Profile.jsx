@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Shield, Bell, Moon, HelpCircle, LogOut, ChevronRight, ArrowLeft, Mail, Phone, MapPin, Briefcase, Edit2, Check, X, KeyRound, Eye, EyeOff, Delete } from 'lucide-react';
+import { User, Shield, Bell, Moon, HelpCircle, LogOut, ChevronRight, ArrowLeft, Mail, Phone, MapPin, Briefcase, Edit2, Check, X, KeyRound, Eye, EyeOff, Delete, Home as HomeIcon, FolderKanban, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import insightEdLogo from '../assets/new_logo.png';
 import { BASE_URL } from '../utils/api';
@@ -445,40 +446,55 @@ const Profile = () => {
     };
 
     return (
-        <div className="app-shell min-h-screen pb-28 overflow-hidden relative font-sans">
+        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
             <Sidebar />
 
-            <main className="flex-1">
-            <div className="academic-grid bg-[var(--brand-navy)] px-5 pt-8 pb-20 rounded-b-[2.5rem] relative overflow-hidden shadow-xl border-b-4 border-[var(--brand-gold)] sm:px-6">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[var(--brand-gold)] rounded-full blur-[100px] opacity-16 -mr-20 -mt-32 pointer-events-none"></div>
+            <main className="flex-1 overflow-y-auto pb-32 relative app-scroll">
+                
+                {/* Header Section */}
+                <div className="bg-gradient-to-br from-[#0B3A68] to-[#154b82] pt-12 pb-24 px-6 md:px-12 relative overflow-hidden shadow-md">
+                    {/* Subtle background pattern */}
+                    <div className="absolute top-0 right-0 -mr-20 -mt-20 opacity-10 pointer-events-none">
+                        <svg width="400" height="400" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="50" fill="currentColor" />
+                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <circle cx="50" cy="50" r="30" fill="currentColor" />
+                        </svg>
+                    </div>
 
-                <div className="flex items-center justify-between relative z-10 max-w-5xl mx-auto">
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-white/12 flex items-center justify-center text-white text-3xl font-extrabold shadow-inner border border-white/20 backdrop-blur-md">
-                            {loading ? '...' : getInitials()}
-                        </div>
-
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-white capitalize tracking-tight drop-shadow-sm">
-                                {loading ? 'Loading...' : `${user?.first_name || ''} ${user?.last_name || ''}`}
-                            </h1>
-                            <div className="flex items-center gap-2 mt-1 sm:mt-2">
-                                <span className="inline-block w-2 h-2 rounded-full bg-[var(--brand-gold)] shadow-[0_0_8px_rgba(239,173,36,0.8)]"></span>
-                                <p className="text-[var(--brand-gold)] text-sm sm:text-base capitalize font-bold tracking-wide">
-                                    {loading ? '...' : (user?.role?.replace('_', ' ') || user?.position || 'Guest')}
-                                </p>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="relative z-10 flex items-center justify-between max-w-7xl mx-auto"
+                    >
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-white/10 flex items-center justify-center text-white text-3xl font-extrabold shadow-inner border border-white/20 backdrop-blur-md">
+                                {loading ? '...' : getInitials()}
                             </div>
-                            <p className="mt-2 max-w-xl text-sm font-medium text-blue-100/75">Manage your account, security settings, and platform preferences.</p>
+
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-black text-white capitalize tracking-tight drop-shadow-sm">
+                                    {loading ? 'Loading...' : `${user?.first_name || ''} ${user?.last_name || ''}`}
+                                </h1>
+                                <div className="flex items-center gap-2 mt-1 sm:mt-2">
+                                    <span className="inline-block w-2 h-2 rounded-full bg-[#A3C6E8] shadow-[0_0_8px_rgba(163,198,232,0.8)]"></span>
+                                    <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">
+                                        {loading ? '...' : (user?.role?.replace('_', ' ') || user?.position || 'Guest')}
+                                    </p>
+                                </div>
+                                <p className="mt-2 max-w-xl text-sm font-medium text-white/80">Manage your account, security settings, and platform preferences.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="hidden md:block">
-                        <img src={insightEdLogo} alt="InsightEd Logo" className="h-20 object-contain drop-shadow-2xl opacity-95" />
-                    </div>
+                        <div className="hidden md:block">
+                            <img src={insightEdLogo} alt="InsightEd Logo" className="h-20 object-contain drop-shadow-2xl opacity-95" />
+                        </div>
+                    </motion.div>
                 </div>
-            </div>
 
-            <div className="p-5 -mt-10 relative max-w-5xl mx-auto z-20">
+                {/* Main Content Dashboard */}
+                <div className="max-w-7xl mx-auto px-5 md:px-12 -mt-12 relative z-20">
                 <AnimatePresence mode="wait">
                     {activeView === null ? (
                         <motion.div key="menu-list" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ x: 30, opacity: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 35 }} className="space-y-4">
@@ -528,6 +544,30 @@ const Profile = () => {
                 )}
             </AnimatePresence>
             </main>
+
+            {/* Mobile Bottom Navigation Bar (Blueprint Requirement) */}
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-6 py-3 pb-safe">
+                <div className="flex items-center justify-between max-w-sm mx-auto">
+                    <Link to="/" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                            <HomeIcon className="w-6 h-6" />
+                        </div>
+                        <span className="text-[11px] font-bold tracking-tight">Home</span>
+                    </Link>
+                    <Link to="/projects-list" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                            <FolderKanban className="w-6 h-6" />
+                        </div>
+                        <span className="text-[11px] font-bold tracking-tight">Projects</span>
+                    </Link>
+                    <Link to="/profile" className="flex flex-col items-center gap-1 text-[#0B3A68]">
+                        <div className="bg-[#EBF2F9] p-2.5 rounded-2xl shadow-sm border border-[#0B3A68]/10">
+                            <Settings className="w-6 h-6 fill-current" />
+                        </div>
+                        <span className="text-[11px] font-black tracking-tight">Settings</span>
+                    </Link>
+                </div>
+            </nav>
         </div>
     );
 };
