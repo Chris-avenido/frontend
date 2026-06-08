@@ -507,10 +507,10 @@ const Login = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={isLogin ? 'login-form' : 'register-form'}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ clipPath: 'inset(50% 50% 50% 50%)', filter: 'blur(10px)' }}
+              animate={{ clipPath: 'inset(0% 0% 0% 0%)', filter: 'blur(0px)' }}
+              exit={{ clipPath: 'inset(50% 50% 50% 50%)', filter: 'blur(10px)' }}
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
               className="my-auto w-full"
             >
               <div className="mb-9 flex flex-col items-center">
