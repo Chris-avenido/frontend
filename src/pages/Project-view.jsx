@@ -21,7 +21,7 @@ import newLogo from '../assets/new_logo.png';
 import { EmptyState, SkeletonBlock } from '../components/BrandUI';
 
 const InfoCard = ({ title, icon: Icon, rows }) => (
-    <motion.section 
+    <motion.section
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -53,8 +53,16 @@ const hasTrancheAmount = (value) => Number(value || 0) > 0;
 const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSaved, formatCurrency }) => {
     const [formData, setFormData] = useState({
         tranche_1: '',
+        tranche_1_liquidated: '',
         tranche_2: '',
-        tranche_3: ''
+        tranche_2_liquidated: '',
+        tranche_3: '',
+        tranche_3_liquidated: ''
+    });
+    const [isConfirmed, setIsConfirmed] = useState({
+        is_tranche_1_confirmed: false,
+        is_tranche_2_confirmed: false,
+        is_tranche_3_confirmed: false
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -62,8 +70,16 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         if (trancheFund) {
             setFormData({
                 tranche_1: trancheFund.tranche_1 || '',
+                tranche_1_liquidated: trancheFund.tranche_1_liquidated || '',
                 tranche_2: trancheFund.tranche_2 || '',
-                tranche_3: trancheFund.tranche_3 || ''
+                tranche_2_liquidated: trancheFund.tranche_2_liquidated || '',
+                tranche_3: trancheFund.tranche_3 || '',
+                tranche_3_liquidated: trancheFund.tranche_3_liquidated || ''
+            });
+            setIsConfirmed({
+                is_tranche_1_confirmed: !!trancheFund.is_tranche_1_confirmed,
+                is_tranche_2_confirmed: !!trancheFund.is_tranche_2_confirmed,
+                is_tranche_3_confirmed: !!trancheFund.is_tranche_3_confirmed
             });
         }
     }, [trancheFund, isOpen]);
@@ -82,10 +98,19 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         };
     }, [isOpen, onClose]);
 
+    const calcTranchePerc = (released, liquidated) => {
+        if (!released || !liquidated || Number(released) <= 0) return 0;
+        return clampPercent((Number(liquidated) / Number(released)) * 100);
+    };
+
+    const tranche1Perc = calcTranchePerc(formData.tranche_1, formData.tranche_1_liquidated);
+    const tranche2Perc = calcTranchePerc(formData.tranche_2, formData.tranche_2_liquidated);
+
     const tranche1Released = hasTrancheAmount(formData.tranche_1);
     const tranche2Released = hasTrancheAmount(formData.tranche_2);
-    const tranche2Enabled = tranche1Released;
-    const tranche3Enabled = tranche1Released && tranche2Released;
+
+    const tranche2Enabled = tranche1Perc >= 100 && isConfirmed.is_tranche_1_confirmed;
+    const tranche3Enabled = tranche2Perc >= 100 && isConfirmed.is_tranche_2_confirmed;
 
     const updateAmount = (field, value) => {
         if (value !== '' && !/^\d*\.?\d{0,2}$/.test(value)) return;
@@ -102,29 +127,44 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         });
     };
 
+    const performSave = async (overrides = {}) => {
+        const sessionUser = getSessionUser();
+        const numericUserId = Number(sessionUser?.uid);
+
+        const payload = {
+            tranche_1: formData.tranche_1 || 0,
+            tranche_1_liquidated: formData.tranche_1_liquidated || 0,
+            tranche_2: formData.tranche_2 || 0,
+            tranche_2_liquidated: formData.tranche_2_liquidated || 0,
+            tranche_3: formData.tranche_3 || 0,
+            tranche_3_liquidated: formData.tranche_3_liquidated || 0,
+            is_tranche_1_confirmed: isConfirmed.is_tranche_1_confirmed,
+            is_tranche_2_confirmed: isConfirmed.is_tranche_2_confirmed,
+            is_tranche_3_confirmed: isConfirmed.is_tranche_3_confirmed,
+            user_id: Number.isFinite(numericUserId) ? numericUserId : 0,
+            ...overrides
+        };
+
+        const response = await api.request(`/projects/${project.project_id}/tranches`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+
+        return response.data;
+    };
+
     const handleSave = async () => {
-        if (hasTrancheAmount(formData.tranche_2) && !hasTrancheAmount(formData.tranche_1)) {
-            return Swal.fire({ icon: 'warning', title: 'Tranche 1 Required', text: 'Release Tranche 1 before Tranche 2.', confirmButtonColor: '#0B3A68' });
+        if (hasTrancheAmount(formData.tranche_2) && (!isConfirmed.is_tranche_1_confirmed || tranche1Perc < 100)) {
+            return Swal.fire({ icon: 'warning', title: 'Tranche 1 Required', text: 'Confirm Tranche 1 and reach 100% liquidation before Tranche 2.', confirmButtonColor: '#0B3A68' });
         }
-        if (hasTrancheAmount(formData.tranche_3) && !hasTrancheAmount(formData.tranche_2)) {
-            return Swal.fire({ icon: 'warning', title: 'Tranche 2 Required', text: 'Release Tranche 2 before Tranche 3.', confirmButtonColor: '#0B3A68' });
+        if (hasTrancheAmount(formData.tranche_3) && (!isConfirmed.is_tranche_2_confirmed || tranche2Perc < 100)) {
+            return Swal.fire({ icon: 'warning', title: 'Tranche 2 Required', text: 'Confirm Tranche 2 and reach 100% liquidation before Tranche 3.', confirmButtonColor: '#0B3A68' });
         }
 
         setIsSaving(true);
         try {
-            const sessionUser = getSessionUser();
-            const numericUserId = Number(sessionUser?.uid);
-            const response = await api.request(`/projects/${project.project_id}/tranches`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    tranche_1: formData.tranche_1 || 0,
-                    tranche_2: formData.tranche_2 || 0,
-                    tranche_3: formData.tranche_3 || 0,
-                    user_id: Number.isFinite(numericUserId) ? numericUserId : 0
-                })
-            });
-
-            if (onSaved) onSaved(response.data);
+            const data = await performSave();
+            if (onSaved) onSaved(data);
             Swal.fire({
                 icon: 'success',
                 title: 'Tranches Updated',
@@ -145,21 +185,54 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         }
     };
 
-    const trancheSteps = [
-        { key: 'tranche_1', title: 'Tranche 1', enabled: true, requirementText: 'Reach 50% to be eligible for Tranche 2' },
-        { key: 'tranche_2', title: 'Tranche 2', enabled: tranche2Enabled, requirementText: 'Reach 80% to be eligible for Tranche 3' },
-        { key: 'tranche_3', title: 'Tranche 3', enabled: tranche3Enabled, requirementText: '' }
-    ];
-
-    const calcPerc = (amount) => {
-        if (!amount || !budget || budget <= 0) return 0;
-        return clampPercent((Number(amount) / budget) * 100);
+    const handleConfirmTranche = (key, title, confirmKey) => {
+        Swal.fire({
+            title: `Confirm ${title}`,
+            text: `Are you sure you want to lock in the amount and liquidation baseline for ${title}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0B3A68',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Confirm & Lock'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                setIsSaving(true);
+                try {
+                    const data = await performSave({ [confirmKey]: true });
+                    if (onSaved) onSaved(data);
+                    setIsConfirmed(prev => ({ ...prev, [confirmKey]: true }));
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Locked!',
+                        text: `${title} has been confirmed.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unable to Lock',
+                        text: error.message || 'Please review the values and try again.',
+                        confirmButtonColor: '#D31F35'
+                    });
+                } finally {
+                    setIsSaving(false);
+                }
+            }
+        });
     };
 
+    const trancheSteps = [
+        { key: 'tranche_1', confirmKey: 'is_tranche_1_confirmed', title: 'Tranche 1', enabled: true, requirementText: 'Reach 100% to unlock Tranche 2' },
+        { key: 'tranche_2', confirmKey: 'is_tranche_2_confirmed', title: 'Tranche 2', enabled: tranche2Enabled, requirementText: 'Reach 100% to unlock Tranche 3' },
+        { key: 'tranche_3', confirmKey: 'is_tranche_3_confirmed', title: 'Tranche 3', enabled: tranche3Enabled, requirementText: '' }
+    ];
+
+
     const summaryTranches = [
-        { label: 'Tranche 1', value: calcPerc(formData.tranche_1) },
-        { label: 'Tranche 2', value: calcPerc(formData.tranche_2) },
-        { label: 'Tranche 3', value: calcPerc(formData.tranche_3) }
+        { label: 'Tranche 1', value: calcTranchePerc(formData.tranche_1, formData.tranche_1_liquidated) },
+        { label: 'Tranche 2', value: calcTranchePerc(formData.tranche_2, formData.tranche_2_liquidated) },
+        { label: 'Tranche 3', value: calcTranchePerc(formData.tranche_3, formData.tranche_3_liquidated) }
     ];
 
     return (
@@ -202,7 +275,7 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
 
                         <div className="app-scroll overflow-y-auto p-6 md:p-8 flex-1 bg-[#F8FAFC]">
                             <div className="mx-auto max-w-4xl space-y-6">
-                                
+
                                 {/* Project Info Pill */}
                                 <div className="flex justify-center">
                                     <div className="bg-white rounded-full border border-slate-200 shadow-sm px-8 py-4 text-center">
@@ -214,7 +287,7 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                                 {/* Total Fund Box */}
                                 <section className="bg-white rounded-3xl border border-slate-200 shadow-sm px-6 py-8 md:px-10 md:py-10 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#EBF2F9] rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
-                                    
+
                                     <div className="flex flex-col items-center justify-center mb-8 md:mb-10 relative z-10">
                                         <div className="flex items-baseline gap-3 md:gap-4">
                                             <span className="text-xl md:text-2xl font-bold text-slate-500">Total Fund:</span>
@@ -232,67 +305,97 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
 
                                 {/* 2x2 Grid for Tranches & Summary */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {trancheSteps.map(({ key, title, enabled, requirementText }) => (
-                                        <section key={key} className={`bg-white rounded-3xl border ${enabled ? 'border-slate-200 shadow-sm' : 'border-slate-100 opacity-70'} p-6 relative`}>
-                                            
-                                            {/* Top Right Badges */}
-                                            <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
-                                                {/* Liquidation Percentage Box */}
-                                                <div className="flex items-center gap-2 border border-slate-200 rounded-xl pl-3 pr-2 py-1.5 bg-slate-50 shadow-sm">
-                                                    <span className="text-[8px] font-black text-slate-400 leading-[1.1] uppercase tracking-widest text-right w-16">Liquidation Percentage</span>
-                                                    <div className="bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-[#0B3A68] text-base md:text-lg min-w-[50px] md:min-w-[60px] text-center shadow-sm">
-                                                        {enabled ? '15%' : ''}
+                                    {trancheSteps.map(({ key, confirmKey, title, enabled, requirementText }) => {
+                                        const isTrancheConfirmed = isConfirmed[confirmKey];
+                                        const isValid = hasTrancheAmount(formData[key]);
+
+                                        return (
+                                            <section key={key} aria-disabled={!enabled} className={`bg-white rounded-3xl border ${enabled ? 'border-slate-200 shadow-sm' : 'border-slate-100 opacity-60 pointer-events-none'} p-6 relative flex flex-col`}>
+
+                                                {/* Top Right Badges */}
+                                                <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
+                                                    {/* Liquidation Percentage Box */}
+                                                    <div className="flex items-center gap-2 border border-slate-200 rounded-xl pl-3 pr-2 py-1.5 bg-slate-50 shadow-sm">
+                                                        <span className="text-[8px] font-black text-slate-400 leading-[1.1] uppercase tracking-widest text-right w-16">Liquidation Percentage</span>
+                                                        <div className="bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-[#0B3A68] text-base md:text-lg min-w-[50px] md:min-w-[60px] text-center shadow-sm">
+                                                            {enabled ? `${calcTranchePerc(formData[key], formData[`${key}_liquidated`]).toFixed(0)}%` : ''}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Eligibility Pill */}
+                                                    {requirementText && (
+                                                        <div className="border border-slate-200 rounded-full px-3 py-1 bg-white shadow-sm">
+                                                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                                                                {requirementText}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Tranche Content */}
+                                                <div className="pt-2 flex-1">
+                                                    <h4 className="text-lg font-black text-[#0B3A68] mb-12">{title}</h4>
+
+                                                    <div className="space-y-5">
+                                                        <div>
+                                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Released Amount</label>
+                                                            {enabled ? (
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    disabled={isTrancheConfirmed || !enabled}
+                                                                    value={formData[key]}
+                                                                    onChange={(e) => updateAmount(key, e.target.value)}
+                                                                    className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                    placeholder="Enter amount..."
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                    LOCKED
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidated Amount</label>
+                                                            {enabled ? (
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    disabled={!enabled}
+                                                                    value={formData[`${key}_liquidated`]}
+                                                                    onChange={(e) => updateAmount(`${key}_liquidated`, e.target.value)}
+                                                                    className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-emerald-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                    placeholder="Enter liquidated amount..."
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                    LOCKED
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                
-                                                {/* Eligibility Pill */}
-                                                {requirementText && (
-                                                    <div className="border border-slate-200 rounded-full px-3 py-1 bg-white shadow-sm">
-                                                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                                                            {requirementText}
-                                                        </span>
+
+                                                {/* Confirm Button Area */}
+                                                {enabled && !isTrancheConfirmed && (
+                                                    <div className="mt-6 border-t border-slate-100 pt-5 flex justify-end">
+                                                        <button
+                                                            onClick={() => handleConfirmTranche(key, title, confirmKey)}
+                                                            disabled={!isValid || isSaving}
+                                                            className="px-5 py-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl disabled:opacity-50 transition-all hover:bg-slate-900 shadow-sm"
+                                                        >
+                                                            Confirm {title}
+                                                        </button>
                                                     </div>
                                                 )}
-                                            </div>
-
-                                            {/* Tranche Content */}
-                                            <div className="pt-2">
-                                                <h4 className="text-lg font-black text-[#0B3A68] mb-12">{title}</h4>
-                                                
-                                                <div className="space-y-5">
-                                                    <div>
-                                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">{title}</label>
-                                                        {enabled ? (
-                                                            <input
-                                                                type="text"
-                                                                inputMode="decimal"
-                                                                value={formData[key]}
-                                                                onChange={(e) => updateAmount(key, e.target.value)}
-                                                                className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm"
-                                                                placeholder="Enter amount..."
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
-                                                                LOCKED
-                                                            </div>
-                                                        )}
+                                                {enabled && isTrancheConfirmed && (
+                                                    <div className="mt-6 border-t border-slate-100 pt-5 flex justify-end">
+                                                        <span className="text-xs font-black text-emerald-600 flex items-center gap-1.5 uppercase tracking-widest"><CheckCircle2 className="w-4 h-4" /> Confirmed & Locked</span>
                                                     </div>
-                                                    <div>
-                                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidation</label>
-                                                        {enabled ? (
-                                                            <div className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 flex items-center text-sm font-black text-slate-600 shadow-inner">
-                                                                {formData[key] ? formatCurrency(Number(formData[key]) * 0.15) : '0.00'}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
-                                                                LOCKED
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </section>
-                                    ))}
+                                                )}
+                                            </section>
+                                        );
+                                    })}
 
                                     <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col">
                                         <h4 className="text-lg font-black text-[#0B3A68] mb-6">Summary</h4>
@@ -368,9 +471,9 @@ const ProjectDetailView = ({ project, onBack }) => {
                         <circle cx="50" cy="50" r="30" fill="currentColor" />
                     </svg>
                 </div>
-                
+
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 max-w-7xl mx-auto">
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex items-center gap-4"
@@ -392,7 +495,7 @@ const ProjectDetailView = ({ project, onBack }) => {
                         </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 rounded-2xl py-3 px-6 flex items-center gap-3 shadow-lg self-start md:self-auto"
@@ -404,10 +507,10 @@ const ProjectDetailView = ({ project, onBack }) => {
             </div>
 
             <div className="max-w-7xl mx-auto px-5 md:px-12 -mt-12 relative z-20 space-y-6">
-                
+
                 {/* Top Row: Project Info & Actions */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5">
-                    <motion.section 
+                    <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden"
@@ -424,7 +527,7 @@ const ProjectDetailView = ({ project, onBack }) => {
                         </div>
                     </motion.section>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -436,7 +539,7 @@ const ProjectDetailView = ({ project, onBack }) => {
                             </div>
                             <span className="text-[11px] font-black text-slate-700 tracking-widest uppercase">View MOA</span>
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setIsFundModalOpen(true)}
                             className="flex-1 lg:w-[150px] flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-[#8A1538]/30 hover:shadow-md transition-all group p-5"

@@ -10,7 +10,13 @@ import {
     Layers,
     Home as HomeIcon,
     FolderKanban,
-    Settings
+    Settings,
+    LayoutGrid,
+    List,
+    ArrowRight,
+    Clock,
+    CheckCircle2,
+    Building2
 } from 'lucide-react';
 import Sidebar from "../components/Sidebar";
 import api from '../utils/api';
@@ -28,6 +34,7 @@ const ProjectProcess = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [viewMode, setViewMode] = useState('table');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -216,10 +223,28 @@ const ProjectProcess = () => {
 
                     {/* List of Projects */}
                     <div>
-                        <h2 className="text-lg font-black text-slate-800 flex items-center gap-2.5 tracking-tight mb-5">
-                            <Layers className="w-5 h-5 text-[#0B3A68]" /> 
-                            List of Projects
-                        </h2>
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-lg font-black text-slate-800 flex items-center gap-2.5 tracking-tight">
+                                <Layers className="w-5 h-5 text-[#0B3A68]" /> 
+                                List of Projects
+                            </h2>
+                            <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                                <button
+                                    onClick={() => setViewMode('card')}
+                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-[#0B3A68] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                    title="Card View"
+                                >
+                                    <LayoutGrid className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-[#0B3A68] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                    title="Table View"
+                                >
+                                    <List className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
 
                         {isLoading ? (
                             <div className="space-y-4">
@@ -234,55 +259,148 @@ const ProjectProcess = () => {
                                 <p className="text-sm font-semibold text-slate-500">Adjust your search or filter parameters to find what you're looking for.</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className={viewMode === 'card' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : ''}>
                                 <AnimatePresence mode="popLayout">
-                                    {projects.map((project, index) => (
-                                        <motion.article
-                                            key={project.project_id}
+                                    {viewMode === 'card' ? (
+                                        projects.map((project, index) => (
+                                            <motion.article
+                                                key={project.project_id}
+                                                initial={{ opacity: 0, y: 15 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.98 }}
+                                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
+                                                className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer relative flex flex-col group"
+                                            >
+                                                {/* Top Line: Avatar and Badges */}
+                                                <div className="flex justify-between items-start mb-6">
+                                                    <div className="w-[60px] h-[60px] bg-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(59,130,246,0.12)] border border-slate-50 text-[#3b82f6] shrink-0">
+                                                        <Building2 className="w-7 h-7 stroke-[1.5]" />
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#fbbf24] text-white">
+                                                            OIC
+                                                        </span>
+                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'bg-red-50 text-red-600' : 'bg-[#ecfdf5] text-[#10b981]'}`}>
+                                                            {project.is_eligible === false ? 'INACTIVE' : 'ACTIVE'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Title and Subtitle */}
+                                                <div className="mb-8">
+                                                    <h3 className="text-[20px] font-black italic text-[#1e293b] tracking-tight leading-tight mb-2 group-hover:text-[#0B3A68] transition-colors line-clamp-2">
+                                                        [ STAGING ] {getProjectTitle(project).toUpperCase()}
+                                                    </h3>
+                                                    <div className="text-[10px] font-black text-[#0B3A68] uppercase tracking-widest flex items-center gap-1.5">
+                                                        <span className="truncate">{project.school_name?.toUpperCase() || 'ASSISTANT SCHOOLS DIVISION SUPERINTENDENT'}</span>
+                                                        <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Key-Values */}
+                                                <div className="space-y-4 mb-8">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">STRAND</span>
+                                                        <span className="text-[11px] font-black text-[#1e293b] text-right">{project.region || 'Region VII'}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">OFFICE</span>
+                                                        <span className="text-[11px] font-black text-[#1e293b] text-right">{project.division || 'Regional Office'}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action Pills */}
+                                                <div className="flex flex-wrap gap-2 mb-8 mt-auto">
+                                                    <div className="bg-[#fff7ed] text-[#ea580c] px-3 py-1.5 rounded-md flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                                                        <Layers className="w-3 h-3" />
+                                                        REASSIGN
+                                                    </div>
+                                                    <div className="bg-[#fef2f2] text-[#ef4444] px-3 py-1.5 rounded-md flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                                                        <Clock className="w-3 h-3" />
+                                                        VACATE
+                                                    </div>
+                                                    <div className="bg-[#ecfdf5] text-[#10b981] px-3 py-1.5 rounded-md flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        SUCCEED
+                                                    </div>
+                                                </div>
+
+                                                {/* Footer */}
+                                                <div className="flex items-center justify-between pt-0 mt-auto">
+                                                    <span className="text-[10px] font-black italic text-slate-300 uppercase tracking-widest group-hover:text-[#0B3A68] transition-colors flex items-center gap-1.5">
+                                                        FULL PROFILE <ArrowRight className="w-3 h-3" />
+                                                    </span>
+                                                    <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-slate-400 group-hover:bg-slate-100 transition-colors">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                    </div>
+                                                </div>
+                                            </motion.article>
+                                        ))
+                                    ) : (
+                                        <motion.div
                                             initial={{ opacity: 0, y: 15 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.98 }}
-                                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                                            onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
-                                            className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer relative overflow-hidden group"
+                                            exit={{ opacity: 0 }}
+                                            className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto w-full"
                                         >
-                                            {/* Top Line: Badges */}
-                                            <div className="flex justify-between items-start mb-3">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${project.project_category && project.project_category.toLowerCase() === 'new' ? 'bg-[#FFF8EB] border-[#FDE1AC] text-[#D97706] border' : getStatusStyle(project.project_category)}`}>
-                                                    {project.project_category || 'New'}
-                                                </span>
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
-                                                    {project.is_eligible === false ? 'Not Eligible' : 'Eligible'}
-                                                </span>
-                                            </div>
-
-                                            {/* Title and Subtitle */}
-                                            <div className="mb-6">
-                                                <h3 className="text-lg md:text-xl font-black text-[#0B3A68] tracking-tight leading-snug group-hover:text-[#154b82] transition-colors">
-                                                    {getProjectTitle(project)} <span className="text-slate-400 font-bold">({project.school_name || 'Maniwaya Elementary School'} | {project.school_id || '123456'})</span>
-                                                </h3>
-                                                <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wide">
-                                                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                                    <span className="truncate">{project.region || 'Region'} | {project.division || 'Division'} | {project.municipality || 'Municipality'} | {project.district || 'Legislative District'}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Bottom Badges/Values */}
-                                            <div className="flex flex-wrap gap-2.5">
-                                                {[
-                                                    ['Total Budget', formatCurrency(project.contract_amount)],
-                                                    ['Total Funds Released', formatCurrency(project.approved_budget_for_contract)],
-                                                    ['Total Liquidation', formatCurrency(project.approved_budget_for_contract * 0.42)],
-                                                    [project.latest_tranche_status || getLatestTrancheStatus(project), formatCurrency(getLatestTrancheAmount(project))]
-                                                ].map(([label, value]) => (
-                                                    <div key={label} className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 flex items-center gap-2 transition-colors group-hover:bg-slate-100">
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}:</span>
-                                                        <span className="text-xs font-black text-slate-800">{value}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </motion.article>
-                                    ))}
+                                            <table className="w-full text-left border-collapse whitespace-nowrap min-w-[900px]">
+                                                <thead>
+                                                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                        <th className="px-5 py-4">Project Details</th>
+                                                        <th className="px-5 py-4">Location & District</th>
+                                                        <th className="px-5 py-4 text-center">Status</th>
+                                                        <th className="px-5 py-4 text-right">Budget & Released</th>
+                                                        <th className="px-5 py-4 text-right">Latest Tranche</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100">
+                                                    {projects.map((project, index) => (
+                                                        <tr
+                                                            key={project.project_id}
+                                                            onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
+                                                            className="hover:bg-slate-50 cursor-pointer group transition-colors"
+                                                        >
+                                                            <td className="px-5 py-4 max-w-[300px] truncate">
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${project.project_category && project.project_category.toLowerCase() === 'new' ? 'bg-[#FFF8EB] border-[#FDE1AC] text-[#D97706] border' : getStatusStyle(project.project_category)}`}>
+                                                                            {project.project_category || 'New'}
+                                                                        </span>
+                                                                        <span className="font-black text-[#0B3A68] text-sm group-hover:text-[#154b82] transition-colors truncate">{getProjectTitle(project)}</span>
+                                                                    </div>
+                                                                    <div className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5">
+                                                                        <span className="truncate">{project.school_name || 'Maniwaya Elementary School'}</span>
+                                                                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                                                        <span>{project.school_id || '123456'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-5 py-4">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <span className="text-[11px] font-bold text-slate-700">{project.region || 'Region'} | {project.division || 'Division'}</span>
+                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{project.municipality || 'Municipality'} | {project.district || 'District'}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-5 py-4 text-center">
+                                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                                                                    {project.is_eligible === false ? 'Not Eligible' : 'Eligible'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-5 py-4 text-right">
+                                                                <div className="font-black text-sm text-slate-800">{formatCurrency(project.contract_amount)}</div>
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Released: {formatCurrency(project.approved_budget_for_contract)}</div>
+                                                            </td>
+                                                            <td className="px-5 py-4 text-right">
+                                                                <div className="font-black text-sm text-[#0B3A68]">{formatCurrency(getLatestTrancheAmount(project))}</div>
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{project.latest_tranche_status || getLatestTrancheStatus(project)}</div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </motion.div>
+                                    )}
                                 </AnimatePresence>
                             </div>
                         )}
