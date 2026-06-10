@@ -17,6 +17,12 @@ import {
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgot, setIsForgot] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1);
+  const [resetToken, setResetToken] = useState(null);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   // Login State
   const [email, setEmail] = useState('');
@@ -169,6 +175,114 @@ const Login = () => {
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
 
+    if (isForgot) {
+      if (forgotStep === 1) {
+        if (!email) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Missing Field',
+            text: 'Please enter your registered email address.',
+            confirmButtonColor: '#0B3A68',
+            customClass: { popup: 'rounded-2xl shadow-2xl' }
+          });
+        }
+        setIsLoading(true);
+        Swal.fire({
+          title: 'Sending Verification Code...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+          customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+        });
+        try {
+          const res = await api.post('/users/forgot-password', { email });
+          if (res.data?.token) {
+            setResetToken(res.data.token);
+            setForgotStep(2);
+            Swal.fire({
+              icon: 'success',
+              title: 'Code Sent',
+              text: 'Please check your email for the 6-digit verification code.',
+              confirmButtonColor: '#0B3A68',
+              customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Request Failed',
+            text: error.message || 'An error occurred.',
+            confirmButtonColor: '#D31F35',
+            customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      } else if (forgotStep === 2) {
+        if (!resetCode || !newPassword || !confirmNewPassword) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Missing Fields',
+            text: 'Please complete all fields to reset your password.',
+            confirmButtonColor: '#0B3A68',
+            customClass: { popup: 'rounded-2xl shadow-2xl' }
+          });
+        }
+        if (newPassword !== confirmNewPassword) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Password Mismatch',
+            text: 'New password and confirm password must match.',
+            confirmButtonColor: '#0B3A68',
+            customClass: { popup: 'rounded-2xl shadow-2xl' }
+          });
+        }
+        if (resetCode.length !== 6) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Code',
+            text: 'The verification code must be exactly 6 digits.',
+            confirmButtonColor: '#0B3A68',
+            customClass: { popup: 'rounded-2xl shadow-2xl' }
+          });
+        }
+
+        setIsLoading(true);
+        Swal.fire({
+          title: 'Verifying Code...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+          customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+        });
+        try {
+          await api.post('/users/reset-password', { token: resetToken, code: resetCode, newPassword });
+          Swal.fire({
+            icon: 'success',
+            title: 'Password Reset',
+            text: 'Your password has been updated successfully. You can now login.',
+            confirmButtonColor: '#0B3A68',
+            customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+          });
+          setIsForgot(false);
+          setIsLogin(true);
+          setForgotStep(1);
+          setResetCode('');
+          setNewPassword('');
+          setConfirmNewPassword('');
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Reset Failed',
+            text: error.message || 'An error occurred.',
+            confirmButtonColor: '#D31F35',
+            customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      return;
+    }
+
     if (isLogin) {
       if (!email || !password) {
         return Swal.fire({
@@ -257,6 +371,8 @@ const Login = () => {
         });
       }
 
+
+
       if (verification_code !== (import.meta.env.VITE_VERIFICATION_CODE || '6registration9')) {
         return Swal.fire({
           icon: 'error',
@@ -301,7 +417,7 @@ const Login = () => {
         Swal.fire({
           icon: 'error',
           title: 'Registration Failed',
-          text: error.response?.data?.message || error.message || 'An error occurred during registration.',
+          text: error.message || 'An error occurred during registration.',
           confirmButtonColor: '#D31F35',
           customClass: { popup: 'rounded-2xl shadow-2xl font-sans' }
         });
@@ -312,6 +428,11 @@ const Login = () => {
   };
 
   const toggleAuthMode = () => {
+    setIsForgot(false);
+    setForgotStep(1);
+    setResetCode('');
+    setNewPassword('');
+    setConfirmNewPassword('');
     setIsLogin(!isLogin);
     setCurrentStep(1);
     setEmail('');
@@ -324,6 +445,17 @@ const Login = () => {
     });
     setAddressCodes({ region: '', province: '', city: '', barangay: '' });
     setAddressOptions(prev => ({ ...prev, provinces: [], cities: [], barangays: [] }));
+  };
+
+  const toggleForgotMode = (e) => {
+    e.preventDefault();
+    setIsForgot(true);
+    setForgotStep(1);
+    setResetCode('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setIsLogin(false);
+    setEmail('');
   };
 
   const isFilled = (value) => String(value ?? '').trim().length > 0;
@@ -350,6 +482,17 @@ const Login = () => {
     e?.preventDefault();
     e?.stopPropagation();
     if (!isStepComplete()) return;
+
+    if (currentStep === 1 && !regData.email.endsWith('@deped.gov.ph')) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email Domain',
+        text: 'Only @deped.gov.ph emails are allowed for registration.',
+        confirmButtonColor: '#D31F35',
+        customClass: { popup: 'rounded-2xl shadow-2xl' }
+      });
+    }
+
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -515,17 +658,31 @@ const Login = () => {
             >
               <div className="mb-9 flex flex-col items-center">
                 <img src={logo} alt="InsightED Logo" className="mb-5 h-20 w-auto object-contain drop-shadow-sm md:h-24" />
-                <p className="brand-kicker mb-2">{isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`}</p>
+                <p className="brand-kicker mb-2">{isForgot ? 'Account Recovery' : (isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`)}</p>
                 <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--ink)]">
-                  {isLogin ? 'Welcome Back' : 'Create Account'}
+                  {isForgot ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
                 </h2>
                 <p className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
-                  {isLogin ? 'Please authenticate your administrative account.' : 'Register your details to request system access. Ensure all information is accurate.'}
+                  {isForgot 
+                    ? (forgotStep === 1 ? 'Enter your email address to receive a verification code.' : 'Enter the 6-digit code sent to your email and your new password.') 
+                    : (isLogin ? 'Please authenticate your administrative account.' : 'Register your details to request system access. Ensure all information is accurate.')}
                 </p>
               </div>
 
               <form className="space-y-5" onSubmit={handleAuthSubmit} noValidate>
-                {isLogin ? (
+                {isForgot ? (
+                  forgotStep === 1 ? (
+                    <>
+                      {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
+                    </>
+                  ) : (
+                    <>
+                      {renderInput('resetCode', '6-Digit Verification Code', 'text', resetCode, (e) => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6)), KeyRound, '123456')}
+                      {renderInput('newPassword', 'New Password', 'password', newPassword, (e) => setNewPassword(e.target.value), Lock, '********')}
+                      {renderInput('confirmNewPassword', 'Confirm New Password', 'password', confirmNewPassword, (e) => setConfirmNewPassword(e.target.value), Lock, '********')}
+                    </>
+                  )
+                ) : isLogin ? (
                   <>
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
                     {loginMethod === 'password' 
@@ -548,7 +705,7 @@ const Login = () => {
                         </div>
                         <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember device</span>
                       </label>
-                      <a href="#" className="brand-focus text-sm font-bold text-[var(--brand-red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
+                      <a href="#" onClick={toggleForgotMode} className="brand-focus text-sm font-bold text-[var(--brand-red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
                     </div>
                   </>
                 ) : (
@@ -603,7 +760,12 @@ const Login = () => {
                 )}
 
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
-                  {isLogin ? (
+                  {isForgot ? (
+                    <button type="submit" disabled={isLoading} className="brand-button-primary brand-focus group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-4 text-sm font-extrabold disabled:opacity-70">
+                      <span className="relative z-10">{forgotStep === 1 ? 'Send Reset Code' : 'Verify & Reset Password'}</span>
+                      <div className="absolute inset-0 h-full w-full bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                    </button>
+                  ) : isLogin ? (
                     <button type="submit" disabled={isLoading} className="brand-button-primary brand-focus group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-4 text-sm font-extrabold disabled:opacity-70">
                       <span className="relative z-10">Secure Authentication</span>
                       <ChevronRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
@@ -641,9 +803,9 @@ const Login = () => {
 
               <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
                 <p className="text-sm font-medium text-slate-500">
-                  {isLogin ? 'Unauthorized access is strictly prohibited. ' : 'Already have an administrative account? '}
+                  {isForgot || isLogin ? 'Unauthorized access is strictly prohibited. ' : 'Already have an administrative account? '}
                   <button onClick={toggleAuthMode} className="brand-focus font-bold text-[var(--brand-gold)] hover:text-amber-600 transition-colors">
-                    {isLogin ? 'Request Authorization' : 'Secure Sign In'}
+                    {isForgot ? 'Back to Login' : (isLogin ? 'Request Authorization' : 'Secure Sign In')}
                   </button>
                 </p>
               </div>
