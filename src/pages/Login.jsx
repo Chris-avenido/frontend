@@ -33,7 +33,7 @@ const Login = () => {
   const [regData, setRegData] = useState({
     first_name: '', last_name: '', email: '', password: '', confirm_password: '',
     contact_number: '+63', region: '', division: '', province: '',
-    city: '', barangay: '', office: 'Finance', position: '', 
+    city: '', barangay: '', office: 'Finance', position: '',
     passcode: '', verification_code: ''
   });
   const [addressCodes, setAddressCodes] = useState({
@@ -349,7 +349,7 @@ const Login = () => {
       }
     } else {
       if (currentStep < 4) return;
-      
+
       const { first_name, last_name, email: regEmail, password: regPassword, confirm_password, verification_code } = regData;
       if (!first_name || !last_name || !regEmail || !regPassword || !verification_code) {
         return Swal.fire({
@@ -440,7 +440,7 @@ const Login = () => {
     setRegData({
       first_name: '', last_name: '', email: '', password: '', confirm_password: '',
       contact_number: '+63', region: '', division: '', province: '',
-      city: '', barangay: '', office: 'Finance', position: '', 
+      city: '', barangay: '', office: 'Finance', position: '',
       passcode: '', verification_code: ''
     });
     setAddressCodes({ region: '', province: '', city: '', barangay: '' });
@@ -598,7 +598,7 @@ const Login = () => {
       </div>
 
       <div className={`brand-card w-full ${isLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[var(--radius-xl)] bg-white/82 backdrop-blur-xl transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-        
+
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -663,8 +663,8 @@ const Login = () => {
                   {isForgot ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
                 </h2>
                 <p className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
-                  {isForgot 
-                    ? (forgotStep === 1 ? 'Enter your email address to receive a verification code.' : 'Enter the 6-digit code sent to your email and your new password.') 
+                  {isForgot
+                    ? (forgotStep === 1 ? 'Enter your email address to receive a verification code.' : 'Enter the 6-digit code sent to your email and your new password.')
                     : (isLogin ? 'Please authenticate your administrative account.' : 'Register your details to request system access. Ensure all information is accurate.')}
                 </p>
               </div>
@@ -685,10 +685,10 @@ const Login = () => {
                 ) : isLogin ? (
                   <>
                     {renderInput('email', 'Email Address', 'email', email, (e) => setEmail(e.target.value), Mail, 'juan.delacruz@deped.gov.ph')}
-                    {loginMethod === 'password' 
+                    {loginMethod === 'password'
                       ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '********')
                       : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6)), KeyRound, '123456')}
-                    
+
                     <div className="flex justify-end mt-1">
                       <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--brand-navy)] hover:text-[var(--brand-navy-deep)]">
                         {loginMethod === 'password' ? 'Login via Passcode instead' : 'Login via Password instead'}
@@ -721,7 +721,7 @@ const Login = () => {
                         {renderInput('contact_number', 'Contact Number', 'text', regData.contact_number, handleRegChange, Phone, '09123456789', true)}
                       </>
                     )}
-                    
+
                     {currentStep === 2 && (
                       <>
                         <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
@@ -813,7 +813,8 @@ const Login = () => {
           </AnimatePresence>
         </motion.div>
       </div>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }

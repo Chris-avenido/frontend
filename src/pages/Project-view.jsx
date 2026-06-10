@@ -54,27 +54,45 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
     const [formData, setFormData] = useState({
         tranche_1: '',
         tranche_1_liquidated: '',
+        tranche_1_release_date: '',
+        tranche_1_latest_liquidation_date: '',
         tranche_2: '',
         tranche_2_liquidated: '',
+        tranche_2_release_date: '',
+        tranche_2_latest_liquidation_date: '',
         tranche_3: '',
-        tranche_3_liquidated: ''
+        tranche_3_liquidated: '',
+        tranche_3_release_date: '',
+        tranche_3_latest_liquidation_date: ''
     });
     const [isConfirmed, setIsConfirmed] = useState({
         is_tranche_1_confirmed: false,
         is_tranche_2_confirmed: false,
         is_tranche_3_confirmed: false
     });
+    const [isEditing, setIsEditing] = useState({
+        tranche_1: false,
+        tranche_2: false,
+        tranche_3: false
+    });
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (trancheFund) {
+            const fmtDate = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
             setFormData({
                 tranche_1: trancheFund.tranche_1 || '',
                 tranche_1_liquidated: trancheFund.tranche_1_liquidated || '',
+                tranche_1_release_date: fmtDate(trancheFund.tranche_1_release_date),
+                tranche_1_latest_liquidation_date: fmtDate(trancheFund.tranche_1_latest_liquidation_date),
                 tranche_2: trancheFund.tranche_2 || '',
                 tranche_2_liquidated: trancheFund.tranche_2_liquidated || '',
+                tranche_2_release_date: fmtDate(trancheFund.tranche_2_release_date),
+                tranche_2_latest_liquidation_date: fmtDate(trancheFund.tranche_2_latest_liquidation_date),
                 tranche_3: trancheFund.tranche_3 || '',
-                tranche_3_liquidated: trancheFund.tranche_3_liquidated || ''
+                tranche_3_liquidated: trancheFund.tranche_3_liquidated || '',
+                tranche_3_release_date: fmtDate(trancheFund.tranche_3_release_date),
+                tranche_3_latest_liquidation_date: fmtDate(trancheFund.tranche_3_latest_liquidation_date)
             });
             setIsConfirmed({
                 is_tranche_1_confirmed: !!trancheFund.is_tranche_1_confirmed,
@@ -109,11 +127,11 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
     const tranche1Released = hasTrancheAmount(formData.tranche_1);
     const tranche2Released = hasTrancheAmount(formData.tranche_2);
 
-    const tranche2Enabled = tranche1Perc >= 100 && isConfirmed.is_tranche_1_confirmed;
-    const tranche3Enabled = tranche2Perc >= 100 && isConfirmed.is_tranche_2_confirmed;
+    const tranche2Enabled = tranche1Perc >= 50 && isConfirmed.is_tranche_1_confirmed;
+    const tranche3Enabled = tranche2Perc >= 50 && isConfirmed.is_tranche_2_confirmed;
 
     const updateAmount = (field, value) => {
-        if (value !== '' && !/^\d*\.?\d{0,2}$/.test(value)) return;
+        if (!field.includes('_date') && value !== '' && !/^\d*\.?\d{0,2}$/.test(value)) return;
         setFormData((prev) => {
             const next = { ...prev, [field]: value };
             if (field === 'tranche_1' && !hasTrancheAmount(value)) {
@@ -134,10 +152,16 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         const payload = {
             tranche_1: formData.tranche_1 || 0,
             tranche_1_liquidated: formData.tranche_1_liquidated || 0,
+            tranche_1_release_date: formData.tranche_1_release_date || null,
+            tranche_1_latest_liquidation_date: formData.tranche_1_latest_liquidation_date || null,
             tranche_2: formData.tranche_2 || 0,
             tranche_2_liquidated: formData.tranche_2_liquidated || 0,
+            tranche_2_release_date: formData.tranche_2_release_date || null,
+            tranche_2_latest_liquidation_date: formData.tranche_2_latest_liquidation_date || null,
             tranche_3: formData.tranche_3 || 0,
             tranche_3_liquidated: formData.tranche_3_liquidated || 0,
+            tranche_3_release_date: formData.tranche_3_release_date || null,
+            tranche_3_latest_liquidation_date: formData.tranche_3_latest_liquidation_date || null,
             is_tranche_1_confirmed: isConfirmed.is_tranche_1_confirmed,
             is_tranche_2_confirmed: isConfirmed.is_tranche_2_confirmed,
             is_tranche_3_confirmed: isConfirmed.is_tranche_3_confirmed,
@@ -154,11 +178,11 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
     };
 
     const handleSave = async () => {
-        if (hasTrancheAmount(formData.tranche_2) && (!isConfirmed.is_tranche_1_confirmed || tranche1Perc < 100)) {
-            return Swal.fire({ icon: 'warning', title: 'Tranche 1 Required', text: 'Confirm Tranche 1 and reach 100% liquidation before Tranche 2.', confirmButtonColor: '#0B3A68' });
+        if (hasTrancheAmount(formData.tranche_2) && (!isConfirmed.is_tranche_1_confirmed || tranche1Perc < 50)) {
+            return Swal.fire({ icon: 'warning', title: 'Tranche 1 Required', text: 'Confirm Tranche 1 and reach 50% liquidation before Tranche 2.', confirmButtonColor: '#0B3A68' });
         }
-        if (hasTrancheAmount(formData.tranche_3) && (!isConfirmed.is_tranche_2_confirmed || tranche2Perc < 100)) {
-            return Swal.fire({ icon: 'warning', title: 'Tranche 2 Required', text: 'Confirm Tranche 2 and reach 100% liquidation before Tranche 3.', confirmButtonColor: '#0B3A68' });
+        if (hasTrancheAmount(formData.tranche_3) && (!isConfirmed.is_tranche_2_confirmed || tranche2Perc < 50)) {
+            return Swal.fire({ icon: 'warning', title: 'Tranche 2 Required', text: 'Confirm Tranche 2 and reach 50% liquidation before Tranche 3.', confirmButtonColor: '#0B3A68' });
         }
 
         setIsSaving(true);
@@ -185,10 +209,10 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         }
     };
 
-    const handleConfirmTranche = (key, title, confirmKey) => {
+    const handleSaveTranche = (key, title, confirmKey) => {
         Swal.fire({
-            title: `Confirm ${title}`,
-            text: `Are you sure you want to lock in the amount and liquidation baseline for ${title}?`,
+            title: `Are you sure you want to update and lock this tranche?`,
+            text: `This will confirm and lock the values for ${title}.`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#0B3A68',
@@ -201,17 +225,18 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                     const data = await performSave({ [confirmKey]: true });
                     if (onSaved) onSaved(data);
                     setIsConfirmed(prev => ({ ...prev, [confirmKey]: true }));
+                    setIsEditing(prev => ({ ...prev, [key]: false }));
                     Swal.fire({
                         icon: 'success',
-                        title: 'Locked!',
-                        text: `${title} has been confirmed.`,
+                        title: 'Saved!',
+                        text: `${title} has been updated and locked.`,
                         timer: 1500,
                         showConfirmButton: false
                     });
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Unable to Lock',
+                        title: 'Unable to Save',
                         text: error.message || 'Please review the values and try again.',
                         confirmButtonColor: '#D31F35'
                     });
@@ -222,9 +247,11 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
         });
     };
 
+    const today = new Date().toISOString().split('T')[0];
+
     const trancheSteps = [
-        { key: 'tranche_1', confirmKey: 'is_tranche_1_confirmed', title: 'Tranche 1', enabled: true, requirementText: 'Reach 100% to unlock Tranche 2' },
-        { key: 'tranche_2', confirmKey: 'is_tranche_2_confirmed', title: 'Tranche 2', enabled: tranche2Enabled, requirementText: 'Reach 100% to unlock Tranche 3' },
+        { key: 'tranche_1', confirmKey: 'is_tranche_1_confirmed', title: 'Tranche 1', enabled: true, requirementText: 'Reach 50% to unlock Tranche 2' },
+        { key: 'tranche_2', confirmKey: 'is_tranche_2_confirmed', title: 'Tranche 2', enabled: tranche2Enabled, requirementText: 'Reach 50% to unlock Tranche 3' },
         { key: 'tranche_3', confirmKey: 'is_tranche_3_confirmed', title: 'Tranche 3', enabled: tranche3Enabled, requirementText: '' }
     ];
 
@@ -307,7 +334,9 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {trancheSteps.map(({ key, confirmKey, title, enabled, requirementText }) => {
                                         const isTrancheConfirmed = isConfirmed[confirmKey];
-                                        const isValid = hasTrancheAmount(formData[key]);
+                                        const isValid = hasTrancheAmount(formData[key]) && 
+                                            !!formData[`${key}_release_date`] &&
+                                            (!hasTrancheAmount(formData[`${key}_liquidated`]) || !!formData[`${key}_latest_liquidation_date`]);
 
                                         return (
                                             <section key={key} aria-disabled={!enabled} className={`bg-white rounded-3xl border ${enabled ? 'border-slate-200 shadow-sm' : 'border-slate-100 opacity-60 pointer-events-none'} p-6 relative flex flex-col`}>
@@ -334,63 +363,108 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
 
                                                 {/* Tranche Content */}
                                                 <div className="pt-2 flex-1">
-                                                    <h4 className="text-lg font-black text-[#0B3A68] mb-12">{title}</h4>
+                                                    <h4 className="text-lg font-black text-[#0B3A68] mb-20">{title}</h4>
 
                                                     <div className="space-y-5">
-                                                        <div>
-                                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Released Amount</label>
-                                                            {enabled ? (
-                                                                <input
-                                                                    type="text"
-                                                                    inputMode="decimal"
-                                                                    disabled={isTrancheConfirmed || !enabled}
-                                                                    value={formData[key]}
-                                                                    onChange={(e) => updateAmount(key, e.target.value)}
-                                                                    className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
-                                                                    placeholder="Enter amount..."
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
-                                                                    LOCKED
-                                                                </div>
-                                                            )}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="flex flex-col justify-end">
+                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Released Amount</label>
+                                                                {enabled ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="decimal"
+                                                                        disabled={!isEditing[key]}
+                                                                        value={formData[key]}
+                                                                        onChange={(e) => updateAmount(key, e.target.value)}
+                                                                        className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                        placeholder="Enter amount..."
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                        LOCKED
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col justify-end">
+                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Release Date</label>
+                                                                {enabled ? (
+                                                                    <input
+                                                                        type="date"
+                                                                        disabled={!isEditing[key]}
+                                                                        max={today}
+                                                                        value={formData[`${key}_release_date`]}
+                                                                        onChange={(e) => updateAmount(`${key}_release_date`, e.target.value)}
+                                                                        className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-[#0B3A68] focus:ring-2 focus:ring-[#0B3A68]/20 focus:border-[#0B3A68] focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                        LOCKED
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidated Amount</label>
-                                                            {enabled ? (
-                                                                <input
-                                                                    type="text"
-                                                                    inputMode="decimal"
-                                                                    disabled={!enabled}
-                                                                    value={formData[`${key}_liquidated`]}
-                                                                    onChange={(e) => updateAmount(`${key}_liquidated`, e.target.value)}
-                                                                    className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-emerald-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
-                                                                    placeholder="Enter liquidated amount..."
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
-                                                                    LOCKED
-                                                                </div>
-                                                            )}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="flex flex-col justify-end">
+                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidated Amount</label>
+                                                                {enabled ? (
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="decimal"
+                                                                        disabled={!isEditing[key]}
+                                                                        value={formData[`${key}_liquidated`]}
+                                                                        onChange={(e) => updateAmount(`${key}_liquidated`, e.target.value)}
+                                                                        className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-emerald-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                        placeholder="Enter liquidated amount..."
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                        LOCKED
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex flex-col justify-end">
+                                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Liquidation Date</label>
+                                                                {enabled ? (
+                                                                    <input
+                                                                        type="date"
+                                                                        disabled={!isEditing[key]}
+                                                                        max={today}
+                                                                        value={formData[`${key}_latest_liquidation_date`]}
+                                                                        onChange={(e) => updateAmount(`${key}_latest_liquidation_date`, e.target.value)}
+                                                                        className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-black text-emerald-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition-all shadow-sm disabled:bg-slate-50 disabled:text-slate-500"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                                                                        LOCKED
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Confirm Button Area */}
-                                                {enabled && !isTrancheConfirmed && (
-                                                    <div className="mt-6 border-t border-slate-100 pt-5 flex justify-end">
-                                                        <button
-                                                            onClick={() => handleConfirmTranche(key, title, confirmKey)}
-                                                            disabled={!isValid || isSaving}
-                                                            className="px-5 py-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl disabled:opacity-50 transition-all hover:bg-slate-900 shadow-sm"
-                                                        >
-                                                            Confirm {title}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                                {enabled && isTrancheConfirmed && (
-                                                    <div className="mt-6 border-t border-slate-100 pt-5 flex justify-end">
-                                                        <span className="text-xs font-black text-emerald-600 flex items-center gap-1.5 uppercase tracking-widest"><CheckCircle2 className="w-4 h-4" /> Confirmed & Locked</span>
+                                                {/* Edit/Save Button Area */}
+                                                {enabled && (
+                                                    <div className="mt-6 border-t border-slate-100 pt-5 flex justify-end items-center gap-4">
+                                                        {!isEditing[key] && isTrancheConfirmed && (
+                                                            <span className="text-xs font-black text-emerald-600 flex items-center gap-1.5 uppercase tracking-widest"><CheckCircle2 className="w-4 h-4" /> Confirmed & Locked</span>
+                                                        )}
+                                                        {!isEditing[key] ? (
+                                                            <button
+                                                                onClick={() => setIsEditing(prev => ({ ...prev, [key]: true }))}
+                                                                className="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl transition-all hover:bg-blue-700 shadow-sm"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleSaveTranche(key, title, confirmKey)}
+                                                                disabled={!isValid || isSaving}
+                                                                className="px-5 py-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl disabled:opacity-50 transition-all hover:bg-slate-900 shadow-sm"
+                                                            >
+                                                                Save
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </section>
