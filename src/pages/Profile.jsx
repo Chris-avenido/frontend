@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import insightEdLogo from '../assets/new_logo.png';
 import { BASE_URL } from '../utils/api';
 import { clearSessionUser, getSessionUser } from '../utils/authSession';
+import './Dashboard.css';
 const items = [
     ['Personal Info', 'Manage account details', User, 'blue'],
     ['Security', 'Privacy & passcode', Shield, 'green'],
@@ -15,11 +16,11 @@ const items = [
 ];
 
 const colors = {
-    blue: 'bg-[var(--brand-sky)] text-[var(--brand-navy)]',
+    blue: 'bg-[var(--blue-50)] text-[var(--navy)]',
     green: 'bg-emerald-100 text-emerald-600',
-    yellow: 'bg-[var(--brand-gold-soft)] text-[var(--brand-navy)]',
+    yellow: 'bg-amber-50 text-[var(--navy)]',
     purple: 'bg-indigo-50 text-indigo-600',
-    pink: 'bg-[var(--brand-red-soft)] text-[var(--brand-red)]',
+    pink: 'bg-red-50 text-[var(--red)]',
 };
 
 const getUserFormData = (user) => ({
@@ -51,23 +52,23 @@ const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) 
         <div className="w-full mt-4">
             <div className="flex justify-center gap-3 mb-8 h-4">
                 {dots.map((_, i) => (
-                    <div key={i} className={`w-4 h-4 rounded-full transition-all duration-300 ${i < passcode.length ? 'bg-[var(--brand-navy)] scale-110 shadow-sm' : 'bg-slate-200 border border-slate-300'}`}></div>
+                    <div key={i} className={`w-4 h-4 rounded-full transition-all duration-300 ${i < passcode.length ? 'bg-[var(--navy)] scale-110 shadow-sm' : 'bg-slate-200 border border-slate-300'}`}></div>
                 ))}
             </div>
 
             <div className="grid grid-cols-3 gap-y-4 gap-x-6 mb-8 px-2 max-w-[280px] mx-auto">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                    <button key={num} onClick={() => handlePress(num.toString())} className="brand-focus w-16 h-16 mx-auto rounded-full bg-slate-50 border border-slate-100 hover:border-[var(--brand-navy)] hover:bg-[var(--brand-navy)] hover:text-white text-[var(--brand-navy)] text-3xl font-light transition-all shadow-sm flex items-center justify-center active:scale-95">
+                    <button key={num} onClick={() => handlePress(num.toString())} className="brand-focus w-16 h-16 mx-auto rounded-full bg-slate-50 border border-slate-100 hover:border-[var(--navy)] hover:bg-[var(--navy)] hover:text-white text-[var(--navy)] text-3xl font-light transition-all shadow-sm flex items-center justify-center active:scale-95">
                         {num}
                     </button>
                 ))}
                 <button onClick={handleClear} className="w-16 h-16 mx-auto rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center justify-center text-sm uppercase tracking-wider">
                     Clear
                 </button>
-                <button onClick={() => handlePress('0')} className="brand-focus w-16 h-16 mx-auto rounded-full bg-slate-50 border border-slate-100 hover:border-[var(--brand-navy)] hover:bg-[var(--brand-navy)] hover:text-white text-[var(--brand-navy)] text-3xl font-light transition-all shadow-sm flex items-center justify-center active:scale-95">
+                <button onClick={() => handlePress('0')} className="brand-focus w-16 h-16 mx-auto rounded-full bg-slate-50 border border-slate-100 hover:border-[var(--navy)] hover:bg-[var(--navy)] hover:text-white text-[var(--navy)] text-3xl font-light transition-all shadow-sm flex items-center justify-center active:scale-95">
                     0
                 </button>
-                <button onClick={handleDelete} className="brand-focus w-16 h-16 mx-auto rounded-full text-slate-400 hover:text-[var(--brand-navy)] hover:bg-slate-100 transition-colors flex items-center justify-center active:scale-95">
+                <button onClick={handleDelete} className="brand-focus w-16 h-16 mx-auto rounded-full text-slate-400 hover:text-[var(--navy)] hover:bg-slate-100 transition-colors flex items-center justify-center active:scale-95">
                     <Delete className="w-6 h-6" />
                 </button>
             </div>
@@ -76,7 +77,7 @@ const MobileDialer = ({ passcode, setPasscode, onVerify, verifying, onCancel }) 
                 <button onClick={onCancel} className="brand-button-secondary brand-focus flex-1 py-4 rounded-xl font-bold tracking-wide">
                     CANCEL
                 </button>
-                <button onClick={() => onVerify(passcode)} disabled={verifying || passcode.length !== 6} className="brand-focus flex-1 py-4 rounded-xl bg-[var(--brand-red)] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-50 tracking-wide shadow-md">
+                <button onClick={() => onVerify(passcode)} disabled={verifying || passcode.length !== 6} className="brand-focus flex-1 py-4 rounded-xl bg-[var(--red)] text-white font-bold hover:bg-red-700 transition-colors disabled:opacity-50 tracking-wide shadow-md">
                     {verifying ? 'VERIFYING...' : 'CONFIRM'}
                 </button>
             </div>
@@ -88,18 +89,18 @@ const PasscodeModal = ({ onVerify, onCancel, verifying, error }) => {
     const [passcode, setPasscode] = useState('');
 
     return (
-        <div className="fixed inset-0 bg-[var(--brand-navy)]/65 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="fixed inset-0 bg-[var(--navy)]/65 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
             <motion.div initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white rounded-t-[2.5rem] sm:rounded-[var(--radius-xl)] p-8 w-full max-w-sm shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-2 bg-[var(--brand-gold)]"></div>
+                <div className="absolute top-0 left-0 w-full h-2 bg-[var(--gold)]"></div>
 
-                <div className="w-16 h-16 bg-[var(--brand-sky)] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[var(--line)]">
-                    <LogOut className="w-8 h-8 text-[var(--brand-navy)]" />
+                <div className="w-16 h-16 bg-[var(--blue-50)] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[var(--line)]">
+                    <LogOut className="w-8 h-8 text-[var(--navy)]" />
                 </div>
-                <h3 className="text-xl font-extrabold text-[var(--brand-navy)] text-center mb-1">Secure Logout</h3>
+                <h3 className="text-xl font-extrabold text-[var(--navy)] text-center mb-1">Secure Logout</h3>
                 <p className="text-sm text-slate-500 text-center mb-6 font-medium">Enter your DepEd system passcode.</p>
 
                 {error && (
-                    <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-[var(--brand-red)] text-sm font-bold text-center mb-4 bg-[var(--brand-red-soft)] py-2 px-4 rounded-xl border border-red-100">
+                    <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-[var(--red)] text-sm font-bold text-center mb-4 bg-red-50 py-2 px-4 rounded-xl border border-red-100">
                         {error}
                     </motion.p>
                 )}
@@ -165,17 +166,17 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
     };
 
     return (
-        <motion.div key="detail-view" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-[2rem] shadow-sm p-6 sm:p-8 min-h-[400px] border border-slate-100">
+        <motion.div key="detail-view" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="dashboard-card !flex-col !items-stretch !gap-0 p-6 sm:p-8 min-h-[400px]">
             <div className="flex items-center justify-between mb-8">
-                <button onClick={onBack} className="brand-focus flex items-center gap-3 text-slate-400 hover:text-[var(--brand-navy)] transition-colors group">
-                    <div className="p-2.5 rounded-2xl bg-slate-50 group-hover:bg-[var(--brand-sky)] transition-colors border border-transparent group-hover:border-[var(--line)]">
+                <button onClick={onBack} className="brand-focus flex items-center gap-3 text-slate-400 hover:text-[var(--navy)] transition-colors group">
+                    <div className="p-2.5 rounded-2xl bg-slate-50 group-hover:bg-[var(--blue-50)] transition-colors border border-transparent group-hover:border-[var(--line)]">
                         <ArrowLeft className="w-5 h-5" />
                     </div>
                     <span className="font-bold text-sm tracking-wide">Return to Menu</span>
                 </button>
 
                 {(activeView === 'Personal Info' || activeView === 'Security') && !loading && user && (
-                    <button onClick={() => { setFormData(getUserFormData(user)); setIsEditing(!isEditing); setError(''); }} className={`brand-focus flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-sm font-bold shadow-sm ${isEditing ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-[var(--brand-navy)] text-white hover:bg-[var(--brand-navy-deep)] hover:shadow-md'}`}>
+                    <button onClick={() => { setFormData(getUserFormData(user)); setIsEditing(!isEditing); setError(''); }} className={`brand-focus flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all text-sm font-bold shadow-sm ${isEditing ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-[var(--navy)] text-white hover:bg-[var(--blue)] hover:shadow-md'}`}>
                         {isEditing ? (
                             <><X className="w-4 h-4" /> Cancel Edit</>
                         ) : (
@@ -185,15 +186,15 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                 )}
             </div>
 
-            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-                <div className="w-1.5 h-6 bg-[var(--brand-gold)] rounded-full"></div>
-                <h2 className="text-2xl font-extrabold text-[var(--brand-navy)] tracking-tight">
+            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-[var(--line)]">
+                <div className="w-1.5 h-6 bg-[var(--gold)] rounded-full"></div>
+                <h2 className="text-2xl font-extrabold text-[var(--navy)] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
                     {activeView}
                 </h2>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-[var(--brand-red-soft)] text-[var(--brand-red)] font-bold rounded-xl text-sm border border-red-100 flex items-center justify-center shadow-sm">
+                <div className="mb-6 p-4 bg-red-50 text-[var(--red)] font-bold rounded-xl text-sm border border-red-100 flex items-center justify-center shadow-sm">
                     {error}
                 </div>
             )}
@@ -238,8 +239,8 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--brand-navy)]/20 hover:shadow-lg hover:shadow-[var(--brand-navy)]/5 transition-all group">
-                                    <div className="p-3 bg-slate-50 text-[var(--brand-navy)] rounded-xl shrink-0 group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--navy)]/20 hover:shadow-lg hover:shadow-[var(--navy)]/5 transition-all group">
+                                    <div className="p-3 bg-slate-50 text-[var(--navy)] rounded-xl shrink-0 group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <User className="w-5 h-5" />
                                     </div>
                                     <div className="overflow-hidden">
@@ -248,8 +249,8 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--brand-navy)]/20 hover:shadow-lg hover:shadow-[var(--brand-navy)]/5 transition-all group">
-                                    <div className="p-3 bg-slate-50 text-[var(--brand-navy)] rounded-xl shrink-0 group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--navy)]/20 hover:shadow-lg hover:shadow-[var(--navy)]/5 transition-all group">
+                                    <div className="p-3 bg-slate-50 text-[var(--navy)] rounded-xl shrink-0 group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <Mail className="w-5 h-5" />
                                     </div>
                                     <div className="overflow-hidden">
@@ -258,8 +259,8 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--brand-navy)]/20 hover:shadow-lg hover:shadow-[var(--brand-navy)]/5 transition-all group">
-                                    <div className="p-3 bg-slate-50 text-[var(--brand-navy)] rounded-xl shrink-0 group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--navy)]/20 hover:shadow-lg hover:shadow-[var(--navy)]/5 transition-all group">
+                                    <div className="p-3 bg-slate-50 text-[var(--navy)] rounded-xl shrink-0 group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <Briefcase className="w-5 h-5" />
                                     </div>
                                     <div className="overflow-hidden">
@@ -268,8 +269,8 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--brand-navy)]/20 hover:shadow-lg hover:shadow-[var(--brand-navy)]/5 transition-all group">
-                                    <div className="p-3 bg-slate-50 text-[var(--brand-navy)] rounded-xl shrink-0 group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--navy)]/20 hover:shadow-lg hover:shadow-[var(--navy)]/5 transition-all group">
+                                    <div className="p-3 bg-slate-50 text-[var(--navy)] rounded-xl shrink-0 group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <Phone className="w-5 h-5" />
                                     </div>
                                     <div className="overflow-hidden">
@@ -278,8 +279,8 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--brand-navy)]/20 hover:shadow-lg hover:shadow-[var(--brand-navy)]/5 transition-all md:col-span-2 group">
-                                    <div className="p-3 bg-slate-50 text-[var(--brand-navy)] rounded-xl shrink-0 group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                <div className="p-5 rounded-2xl bg-white flex items-start gap-4 border border-slate-100 hover:border-[var(--navy)]/20 hover:shadow-lg hover:shadow-[var(--navy)]/5 transition-all md:col-span-2 group">
+                                    <div className="p-3 bg-slate-50 text-[var(--navy)] rounded-xl shrink-0 group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <MapPin className="w-5 h-5" />
                                     </div>
                                     <div className="overflow-hidden">
@@ -315,7 +316,7 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">New Passcode</label>
                                     <div className="relative">
                                         <input type={showPasscode ? "text" : "password"} value={formData.passcode} onChange={(e) => { const val = e.target.value; if (val === '' || /^\d+$/.test(val)) setFormData({ ...formData, passcode: val }); }} placeholder="Numbers only" className="brand-input w-full p-4 pr-12 rounded-xl font-bold tracking-[0.2em]" />
-                                        <button onClick={() => setShowPasscode(!showPasscode)} className="brand-focus absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--brand-navy)] transition-colors p-1">
+                                        <button onClick={() => setShowPasscode(!showPasscode)} className="brand-focus absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--navy)] transition-colors p-1">
                                             {showPasscode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
                                     </div>
@@ -336,12 +337,12 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                             <div className="grid grid-cols-1 gap-5">
                                 <div className="p-6 rounded-2xl bg-white flex items-center justify-between border border-slate-200 shadow-sm group">
                                     <div className="flex items-center gap-5">
-                                        <div className="p-4 bg-slate-50 text-[var(--brand-navy)] rounded-2xl group-hover:bg-[var(--brand-red)] group-hover:text-white transition-colors">
+                                        <div className="p-4 bg-slate-50 text-[var(--navy)] rounded-2xl group-hover:bg-[var(--red)] group-hover:text-white transition-colors">
                                             <KeyRound className="w-6 h-6" />
                                         </div>
                                         <div>
                                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">System Passcode</p>
-                                            <p className="font-extrabold text-[var(--brand-navy)] text-2xl tracking-[0.3em]">
+                                            <p className="font-extrabold text-[var(--navy)] text-2xl tracking-[0.3em]">
                                                 {showPasscode ? user.passcode : '******'}
                                             </p>
                                         </div>
@@ -352,7 +353,7 @@ const DetailView = ({ activeView, onBack, user, loading, onUpdateUser }) => {
                                 </div>
 
                                 <div className="p-6 rounded-2xl bg-white flex items-center gap-5 border border-slate-200 shadow-sm group">
-                                    <div className="p-4 bg-slate-50 text-[var(--brand-navy)] rounded-2xl group-hover:bg-[var(--brand-navy)] group-hover:text-white transition-colors">
+                                    <div className="p-4 bg-slate-50 text-[var(--navy)] rounded-2xl group-hover:bg-[var(--navy)] group-hover:text-white transition-colors">
                                         <Shield className="w-6 h-6" />
                                     </div>
                                     <div>
@@ -395,6 +396,13 @@ const Profile = () => {
 
     const sessionUser = getSessionUser();
     const userId = sessionUser?.uid;
+
+    useEffect(() => {
+        document.body.classList.add('dashboard-body');
+        return () => {
+            document.body.classList.remove('dashboard-body');
+        };
+    }, []);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -446,7 +454,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
+        <div className="flex h-screen overflow-hidden text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
             <Sidebar />
 
             <main className="flex-1 overflow-y-auto pb-32 relative app-scroll">
@@ -474,12 +482,12 @@ const Profile = () => {
                             </div>
 
                             <div>
-                                <h1 className="text-2xl sm:text-3xl font-black text-white capitalize tracking-tight drop-shadow-sm">
+                                <h1 className="text-2xl sm:text-3xl font-black text-white capitalize tracking-tight drop-shadow-sm" style={{ fontFamily: 'var(--font-heading)' }}>
                                     {loading ? 'Loading...' : `${user?.first_name || ''} ${user?.last_name || ''}`}
                                 </h1>
                                 <div className="flex items-center gap-2 mt-1 sm:mt-2">
                                     <span className="inline-block w-2 h-2 rounded-full bg-[#A3C6E8] shadow-[0_0_8px_rgba(163,198,232,0.8)]"></span>
-                                    <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">
+                                    <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm" style={{ fontFamily: 'var(--font-body)' }}>
                                         {loading ? '...' : (user?.role?.replace('_', ' ') || user?.position || 'Guest')}
                                     </p>
                                 </div>
@@ -498,9 +506,9 @@ const Profile = () => {
                 <AnimatePresence mode="wait">
                     {activeView === null ? (
                         <motion.div key="menu-list" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ x: 30, opacity: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 35 }} className="space-y-4">
-                            <div className="bg-white rounded-[2rem] shadow-sm p-4 sm:p-5 space-y-3 border border-slate-100">
+                            <div className="dashboard-card !flex-col !items-stretch !gap-0 p-4 sm:p-5 space-y-3">
                                 {items.map(([title, sub, Icon, color]) => (
-                                    <button key={title} onClick={() => setActiveView(title)} className="brand-focus w-full flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-transparent hover:border-[var(--brand-navy)]/10 hover:bg-slate-50 transition-all group hover:shadow-sm" >
+                                    <button key={title} onClick={() => setActiveView(title)} className="brand-focus w-full flex items-center justify-between p-4 sm:p-5 rounded-2xl border border-transparent hover:border-[var(--navy)]/10 hover:bg-slate-50 transition-all group hover:shadow-sm" >
                                         <div className="flex items-center gap-5">
                                             <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-[1rem] flex items-center justify-center ${colors[color]} shadow-sm group-hover:scale-105 transition-transform`}>
                                                 <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -512,20 +520,20 @@ const Profile = () => {
                                             </div>
                                         </div>
 
-                                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[var(--brand-navy)] group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[var(--navy)] group-hover:translate-x-1 transition-all" />
                                     </button>
                                 ))}
                             </div>
 
-                            <button onClick={() => setShowLogoutModal(true)} className="w-full flex items-center justify-between p-6 rounded-[2rem] bg-white border border-red-100 hover:border-red-300 hover:shadow-md transition-all group overflow-hidden relative">
+                            <button onClick={() => setShowLogoutModal(true)} className="dashboard-card !gap-0 w-full flex items-center justify-between p-6 hover:border-[var(--red)]/30 hover:shadow-md transition-all group overflow-hidden relative">
                                 <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <div className="flex items-center gap-5 relative z-10">
-                                    <div className="w-14 h-14 rounded-[1rem] bg-[var(--brand-red-soft)] flex items-center justify-center shadow-sm group-hover:scale-105 group-hover:bg-[var(--brand-red)] group-hover:text-white text-[var(--brand-red)] transition-all">
+                                    <div className="w-14 h-14 rounded-[1rem] bg-red-50 flex items-center justify-center shadow-sm group-hover:scale-105 group-hover:bg-[var(--red)] group-hover:text-white text-[var(--red)] transition-all">
                                         <LogOut className="w-6 h-6" />
                                     </div>
 
                                     <div className="text-left">
-                                        <h3 className="text-base font-extrabold text-[var(--brand-red)]">Secure System Logout</h3>
+                                        <h3 className="text-base font-extrabold text-[var(--red)]">Secure System Logout</h3>
                                         <p className="text-[13px] font-medium text-red-400 mt-0.5">Verify passcode to terminate active session</p>
                                     </div>
                                 </div>

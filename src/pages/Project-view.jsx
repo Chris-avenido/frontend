@@ -19,26 +19,28 @@ import api from '../utils/api';
 import { getSessionUser } from '../utils/authSession';
 import newLogo from '../assets/new_logo.png';
 import { EmptyState, SkeletonBlock } from '../components/BrandUI';
+import './Dashboard.css';
 
 const InfoCard = ({ title, icon: Icon, rows }) => (
     <motion.section
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+        whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(11,58,104,0.15)' }}
+        className="dashboard-card !flex-col !items-stretch !gap-0 relative overflow-hidden group transition-all duration-300 p-6 md:p-8"
     >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--blue-50)] rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
         <div className="mb-6 flex items-center gap-3 relative z-10">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EBF2F9] text-[#0B3A68] shadow-sm border border-[#0B3A68]/10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--blue-50)] text-[var(--blue)] shadow-sm border border-[var(--blue-100)]">
                 <Icon className="h-6 w-6" />
             </div>
-            <h2 className="text-lg font-black text-[#0B3A68] tracking-tight">{title}</h2>
+            <h2 className="text-lg font-black text-[var(--navy)] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{title}</h2>
         </div>
         <div className="relative z-10 space-y-4">
             {rows.map(([label, value]) => (
-                <div key={label} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
-                    <span className="text-sm font-black text-slate-800 text-left sm:text-right">{value || 'N/A'}</span>
+                <div key={label} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 border-b border-[var(--line)] pb-3 last:border-0 last:pb-0">
+                    <span className="text-[11px] font-black text-[var(--muted)] uppercase tracking-widest">{label}</span>
+                    <span className="text-sm font-black text-[var(--navy)] text-left sm:text-right">{value || 'N/A'}</span>
                 </div>
             ))}
         </div>
@@ -285,14 +287,14 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                         transition={{ duration: 0.22, ease: 'easeOut' }}
                         onMouseDown={(event) => event.stopPropagation()}
                     >
-                        <header className="flex flex-col gap-1 border-b border-slate-100 bg-white px-8 py-6 shrink-0 relative z-20">
-                            <p className="text-sm font-bold text-slate-500 tracking-tight">InsightED Infrastructure</p>
+                        <header className="flex flex-col gap-1 border-b border-[var(--line)] bg-white px-8 py-6 shrink-0 relative z-20">
+                            <p className="text-sm font-bold text-[var(--muted)] tracking-tight">InsightED Infrastructure</p>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-black text-[#0B3A68]">Fund Management</h2>
+                                <h2 className="text-2xl font-black text-[var(--navy)]" style={{ fontFamily: 'var(--font-heading)' }}>Fund Management</h2>
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="brand-focus flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                    className="brand-focus flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--blue-50)] border border-[var(--blue-100)] text-[var(--muted)] hover:bg-[var(--blue-100)] hover:text-[var(--navy)] transition-colors"
                                     aria-label="Close fund download workflow"
                                 >
                                     <X className="h-5 w-5" />
@@ -300,33 +302,33 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                             </div>
                         </header>
 
-                        <div className="app-scroll overflow-y-auto p-6 md:p-8 flex-1 bg-[#F8FAFC]">
+                        <div className="app-scroll overflow-y-auto p-6 md:p-8 flex-1 bg-[var(--bg)]">
                             <div className="mx-auto max-w-4xl space-y-6">
 
                                 {/* Project Info Pill */}
                                 <div className="flex justify-center">
-                                    <div className="bg-white rounded-full border border-slate-200 shadow-sm px-8 py-4 text-center">
-                                        <h3 className="text-sm md:text-base font-black text-[#0B3A68] tracking-tight">{project.project_name || 'Construction of 1STY2CL'}</h3>
-                                        <p className="mt-0.5 text-[11px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">{project.school_name} | {project.school_id}</p>
+                                    <div className="bg-white rounded-full border border-[var(--line)] shadow-sm px-8 py-4 text-center">
+                                        <h3 className="text-sm md:text-base font-black text-[var(--navy)] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{project.project_name || 'Construction of 1STY2CL'}</h3>
+                                        <p className="mt-0.5 text-[11px] md:text-xs font-bold text-[var(--muted)] uppercase tracking-wider">{project.school_name} | {project.school_id}</p>
                                     </div>
                                 </div>
 
                                 {/* Total Fund Box */}
-                                <section className="bg-white rounded-3xl border border-slate-200 shadow-sm px-6 py-8 md:px-10 md:py-10 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#EBF2F9] rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                                <section className="dashboard-card !flex-col !items-stretch !gap-0 px-6 py-8 md:px-10 md:py-10 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--blue-50)] rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
 
                                     <div className="flex flex-col items-center justify-center mb-8 md:mb-10 relative z-10">
                                         <div className="flex items-baseline gap-3 md:gap-4">
-                                            <span className="text-xl md:text-2xl font-bold text-slate-500">Total Fund:</span>
-                                            <span className="text-4xl md:text-5xl lg:text-[56px] font-black text-[#0B3A68] tracking-tight leading-none">
+                                            <span className="text-xl md:text-2xl font-bold text-[var(--muted)]">Total Fund:</span>
+                                            <span className="text-4xl md:text-5xl lg:text-[56px] font-black text-[var(--navy)] tracking-tight leading-none" style={{ fontFamily: 'var(--font-heading)' }}>
                                                 {new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(budget)}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs md:text-sm font-bold text-slate-500 relative z-10">
-                                        <p>Contractor: <span className="text-slate-800 font-black">{displayOrDash(project.contractor_name)}</span></p>
-                                        <p>PCAB License: <span className="text-slate-800 font-black">{displayOrDash(project.pcab_license_number)}</span></p>
+                                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs md:text-sm font-bold text-[var(--muted)] relative z-10">
+                                        <p>Contractor: <span className="text-[var(--navy)] font-black">{displayOrDash(project.contractor_name)}</span></p>
+                                        <p>PCAB License: <span className="text-[var(--navy)] font-black">{displayOrDash(project.pcab_license_number)}</span></p>
                                     </div>
                                 </section>
 
@@ -339,22 +341,22 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                                             (!hasTrancheAmount(formData[`${key}_liquidated`]) || !!formData[`${key}_latest_liquidation_date`]);
 
                                         return (
-                                            <section key={key} aria-disabled={!enabled} className={`bg-white rounded-3xl border ${enabled ? 'border-slate-200 shadow-sm' : 'border-slate-100 opacity-60 pointer-events-none'} p-6 relative flex flex-col`}>
+                                            <section key={key} aria-disabled={!enabled} className={`dashboard-card !items-stretch !gap-0 p-6 relative flex flex-col ${!enabled ? 'opacity-60 pointer-events-none' : ''}`}>
 
                                                 {/* Top Right Badges */}
                                                 <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
                                                     {/* Liquidation Percentage Box */}
-                                                    <div className="flex items-center gap-2 border border-slate-200 rounded-xl pl-3 pr-2 py-1.5 bg-slate-50 shadow-sm">
-                                                        <span className="text-[8px] font-black text-slate-400 leading-[1.1] uppercase tracking-widest text-right w-16">Liquidation Percentage</span>
-                                                        <div className="bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-[#0B3A68] text-base md:text-lg min-w-[50px] md:min-w-[60px] text-center shadow-sm">
+                                                    <div className="flex items-center gap-2 border border-[var(--line)] rounded-xl pl-3 pr-2 py-1.5 bg-[var(--blue-50)] shadow-sm">
+                                                        <span className="text-[8px] font-black text-[var(--muted)] leading-[1.1] uppercase tracking-widest text-right w-16">Liquidation Percentage</span>
+                                                        <div className="bg-white border border-[var(--line)] rounded-lg px-2 py-1 font-black text-[var(--navy)] text-base md:text-lg min-w-[50px] md:min-w-[60px] text-center shadow-sm">
                                                             {enabled ? `${calcTranchePerc(formData[key], formData[`${key}_liquidated`]).toFixed(0)}%` : ''}
                                                         </div>
                                                     </div>
 
                                                     {/* Eligibility Pill */}
                                                     {requirementText && (
-                                                        <div className="border border-slate-200 rounded-full px-3 py-1 bg-white shadow-sm">
-                                                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                                                        <div className="border border-[var(--line)] rounded-full px-3 py-1 bg-white shadow-sm">
+                                                            <span className="text-[8px] font-black text-[var(--muted)] uppercase tracking-widest">
                                                                 {requirementText}
                                                             </span>
                                                         </div>
@@ -363,7 +365,7 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
 
                                                 {/* Tranche Content */}
                                                 <div className="pt-2 flex-1">
-                                                    <h4 className="text-lg font-black text-[#0B3A68] mb-20">{title}</h4>
+                                                    <h4 className="text-lg font-black text-[var(--navy)] mb-20" style={{ fontFamily: 'var(--font-heading)' }}>{title}</h4>
 
                                                     <div className="space-y-5">
                                                         <div className="grid grid-cols-2 gap-4">
@@ -471,17 +473,17 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                                         );
                                     })}
 
-                                    <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col">
-                                        <h4 className="text-lg font-black text-[#0B3A68] mb-6">Summary</h4>
-                                        <div className="space-y-6 flex-1 flex flex-col justify-center bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                                    <section className="dashboard-card !items-stretch !gap-0 p-6 flex flex-col">
+                                        <h4 className="text-lg font-black text-[var(--navy)] mb-6" style={{ fontFamily: 'var(--font-heading)' }}>Summary</h4>
+                                        <div className="space-y-6 flex-1 flex flex-col justify-center bg-[var(--bg)] rounded-2xl p-6 border border-[var(--line)]">
                                             {summaryTranches.map((item) => (
                                                 <div key={item.label}>
                                                     <div className="flex justify-between items-end mb-2">
-                                                        <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{item.label}</span>
-                                                        <span className="text-sm font-black text-[#0B3A68]">{item.value.toFixed(0)}%</span>
+                                                        <span className="text-[11px] font-black text-[var(--muted)] uppercase tracking-widest">{item.label}</span>
+                                                        <span className="text-sm font-black text-[var(--navy)]">{item.value.toFixed(0)}%</span>
                                                     </div>
-                                                    <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner">
-                                                        <div className="h-full bg-gradient-to-r from-[#0B3A68] to-[#154b82] transition-all duration-500 ease-out" style={{ width: `${item.value}%` }}></div>
+                                                    <div className="h-3 w-full bg-[var(--blue-50)] rounded-full overflow-hidden border border-[var(--line)] shadow-inner">
+                                                        <div className="h-full bg-[var(--blue)] transition-all duration-500 ease-out" style={{ width: `${item.value}%` }}></div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -491,11 +493,11 @@ const FundDownloadModal = ({ isOpen, onClose, project, budget, trancheFund, onSa
                             </div>
                         </div>
 
-                        <footer className="border-t border-slate-100 bg-white px-8 py-5 flex justify-end gap-3 shrink-0 relative z-20">
+                        <footer className="border-t border-[var(--line)] bg-white px-8 py-5 flex justify-end gap-3 shrink-0 relative z-20">
                             <button type="button" onClick={onClose} className="h-12 px-6 rounded-xl font-bold text-sm bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">
                                 Cancel
                             </button>
-                            <button type="button" onClick={handleSave} disabled={isSaving} className="h-12 px-8 rounded-xl font-black text-sm bg-[#0B3A68] text-white shadow-md hover:bg-[#154b82] transition-colors disabled:opacity-60 disabled:hover:bg-[#0B3A68]">
+                            <button type="button" onClick={handleSave} disabled={isSaving} className="h-12 px-8 rounded-xl font-black text-sm bg-[var(--navy)] text-white shadow-md hover:bg-[var(--blue)] transition-colors disabled:opacity-60 disabled:hover:bg-[var(--navy)]">
                                 {isSaving ? 'Saving...' : 'Save Updates'}
                             </button>
                         </footer>
@@ -564,8 +566,8 @@ const ProjectDetailView = ({ project, onBack }) => {
                             <img src={newLogo} alt="InsightED logo" className="w-full h-full object-contain drop-shadow-sm" />
                         </div>
                         <div>
-                            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-sm">InsightED Infrastructure</h1>
-                            <p className="text-[#A3C6E8] font-bold text-xs md:text-sm mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">Project View</p>
+                            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-sm" style={{ fontFamily: 'var(--font-heading)' }}>InsightED Infrastructure</h1>
+                            <p className="text-[#A3C6E8] font-bold text-xs md:text-sm mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm" style={{ fontFamily: 'var(--font-body)' }}>Project View</p>
                         </div>
                     </motion.div>
 
@@ -587,17 +589,17 @@ const ProjectDetailView = ({ project, onBack }) => {
                     <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden"
+                        className="dashboard-card !items-stretch !gap-0 relative overflow-hidden transition-all duration-300 p-6 md:p-8 flex flex-col justify-center"
                     >
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#EBF2F9] to-transparent rounded-bl-full -mr-8 -mt-8 opacity-60 pointer-events-none"></div>
-                        <h2 className="text-xl md:text-2xl font-black text-[#0B3A68] tracking-tight leading-snug relative z-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[var(--blue-50)] to-transparent rounded-bl-full -mr-8 -mt-8 opacity-60 pointer-events-none"></div>
+                        <h2 className="text-xl md:text-2xl font-black text-[var(--navy)] tracking-tight leading-snug relative z-10" style={{ fontFamily: 'var(--font-heading)' }}>
                             {project.project_name || 'Construction of 1STY2CL'}
                         </h2>
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest relative z-10">
-                            <School className="w-4 h-4 text-slate-400" />
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--muted)] uppercase tracking-widest relative z-10">
+                            <School className="w-4 h-4 text-[var(--muted)]" />
                             <span>{project.school_name || 'Maniwaya Elementary School'}</span>
-                            <span className="text-slate-300">|</span>
-                            <span className="text-slate-400">{project.school_id || '123456'}</span>
+                            <span className="text-[var(--line)]">|</span>
+                            <span className="text-[var(--muted)]">{project.school_id || '123456'}</span>
                         </div>
                     </motion.section>
 
@@ -607,21 +609,21 @@ const ProjectDetailView = ({ project, onBack }) => {
                         transition={{ delay: 0.1 }}
                         className="flex gap-4"
                     >
-                        <button className="flex-1 lg:w-[150px] flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-[#0B3A68]/30 hover:shadow-md transition-all group p-5">
-                            <div className="w-12 h-12 rounded-2xl bg-[#EBF2F9] text-[#0B3A68] flex items-center justify-center mb-3 group-hover:bg-[#0B3A68] group-hover:text-white transition-colors shadow-sm">
+                        <button className="flex-1 lg:w-[150px] flex flex-col items-center justify-center dashboard-card !gap-0 hover:border-[var(--blue)]/30 hover:shadow-md transition-all group p-5">
+                            <div className="w-12 h-12 rounded-2xl bg-[var(--blue-50)] text-[var(--blue)] flex items-center justify-center mb-3 group-hover:bg-[var(--blue)] group-hover:text-white transition-colors shadow-sm">
                                 <FileText className="w-6 h-6" />
                             </div>
-                            <span className="text-[11px] font-black text-slate-700 tracking-widest uppercase">View MOA</span>
+                            <span className="text-[11px] font-black text-[var(--navy)] tracking-widest uppercase">View MOA</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsFundModalOpen(true)}
-                            className="flex-1 lg:w-[150px] flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-[#8A1538]/30 hover:shadow-md transition-all group p-5"
+                            className="flex-1 lg:w-[150px] flex flex-col items-center justify-center dashboard-card !gap-0 hover:border-[var(--red)]/30 hover:shadow-md transition-all group p-5"
                         >
-                            <div className="w-12 h-12 rounded-2xl bg-[#FDF0F2] text-[#8A1538] flex items-center justify-center mb-3 group-hover:bg-[#8A1538] group-hover:text-white transition-colors shadow-sm">
+                            <div className="w-12 h-12 rounded-2xl bg-[var(--red)]/10 text-[var(--red)] flex items-center justify-center mb-3 group-hover:bg-[var(--red)] group-hover:text-white transition-colors shadow-sm">
                                 <Download className="w-6 h-6" />
                             </div>
-                            <span className="text-[11px] font-black text-slate-700 tracking-widest uppercase text-center">Fund Download</span>
+                            <span className="text-[11px] font-black text-[var(--navy)] tracking-widest uppercase text-center">Fund Download</span>
                         </button>
                     </motion.div>
                 </div>
@@ -714,8 +716,15 @@ export const ProjectView = () => {
         fetchProject();
     }, [projectToken]);
 
+    useEffect(() => {
+        document.body.classList.add('dashboard-body');
+        return () => {
+            document.body.classList.remove('dashboard-body');
+        };
+    }, []);
+
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
+        <div className="flex h-screen overflow-hidden text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
             <Sidebar />
             <main className="flex-1 overflow-y-auto app-scroll relative">
                 <AnimatePresence mode="wait">

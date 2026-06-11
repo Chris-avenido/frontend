@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import api from '../utils/api';
 import { clearSessionUser, isAllowedRole, setSessionUser } from '../utils/authSession';
 import logo from '../assets/new_logo.png';
+import './Dashboard.css';
 import {
   getBarangaysByCityMunicipality,
   getCitiesMunicipalitiesByProvince,
@@ -501,12 +502,12 @@ const Login = () => {
     const Icon = icon;
     return (
       <div className="space-y-1.5 w-full">
-        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--ink-soft)] uppercase tracking-wider ml-1">
+        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--muted)] uppercase tracking-wider ml-1">
           {label}
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
-            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--brand-navy)]' : 'text-slate-400'}`} />
+            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--navy)]' : 'text-slate-400'}`} />
           </div>
           <select
             id={id}
@@ -556,12 +557,12 @@ const Login = () => {
 
     return (
       <div className="space-y-1.5 w-full">
-        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--ink-soft)] uppercase tracking-wider ml-1">
+        <label htmlFor={id} className="block text-xs font-extrabold text-[var(--muted)] uppercase tracking-wider ml-1">
           {label}
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300">
-            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--brand-navy)]' : 'text-slate-400'}`} />
+            <Icon className={`h-4 w-4 ${focusedField === id ? 'text-[var(--navy)]' : 'text-slate-400'}`} />
           </div>
           <input
             id={id}
@@ -580,7 +581,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="brand-focus absolute inset-y-0 right-0 pr-4 flex items-center justify-center text-slate-400 hover:text-[var(--brand-navy)] transition-colors"
+              className="brand-focus absolute inset-y-0 right-0 pr-4 flex items-center justify-center text-slate-400 hover:text-[var(--navy)] transition-colors"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -591,21 +592,21 @@ const Login = () => {
   };
 
   return (
-    <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden py-8 font-sans sm:py-10">
+    <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden py-8 sm:py-10 text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="absolute inset-0 z-0 opacity-80">
-        <div className="absolute left-[-12%] top-[-24%] h-[760px] w-[760px] rounded-full bg-[var(--brand-navy)]/10 blur-[110px]" />
-        <div className="absolute bottom-[-22%] right-[-12%] h-[600px] w-[600px] rounded-full bg-[var(--brand-gold)]/20 blur-[95px]" />
+        <div className="absolute left-[-12%] top-[-24%] h-[760px] w-[760px] rounded-full bg-[#08315F]/10 blur-[110px]" />
+        <div className="absolute bottom-[-22%] right-[-12%] h-[600px] w-[600px] rounded-full bg-[#FBBF24]/20 blur-[95px]" />
       </div>
 
-      <div className={`brand-card w-full ${isLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[var(--radius-xl)] bg-white/82 backdrop-blur-xl transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+      <div className={`w-full ${isLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[2.5rem] bg-white/90 backdrop-blur-xl shadow-2xl border border-white/60 transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
 
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`academic-grid hidden md:flex ${isLogin ? 'md:w-1/2' : 'md:w-1/3'} relative flex-col justify-between overflow-hidden bg-[var(--brand-navy)] p-12 text-white`}
+          className={`academic-grid hidden md:flex ${isLogin ? 'md:w-1/2' : 'md:w-1/3'} relative flex-col justify-between overflow-hidden bg-[var(--navy)] p-12 text-white`}
         >
-          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[var(--brand-gold)]/24 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 h-1.5 w-full bg-[var(--brand-gold)]"></div>
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#FBBF24]/24 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 h-1.5 w-full bg-[var(--gold)]"></div>
           <div className="relative z-10">
             <motion.div className="flex items-center gap-3">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-sm">
@@ -613,14 +614,14 @@ const Login = () => {
               </div>
               <div>
                 <span className="text-xl font-extrabold tracking-tight text-white">InsightED</span>
-                <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--brand-gold)]">Infrastructure Intelligence</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--gold)]">Infrastructure Intelligence</p>
               </div>
             </motion.div>
           </div>
           <motion.div layout className="relative z-10 space-y-6">
-            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
               {isLogin ? 'Academic' : 'Join the'} <br />
-              <span className="text-[var(--brand-gold)]">
+              <span className="text-[var(--gold)]">
                 {isLogin ? 'Finance Portal' : 'Insight Network'}
               </span>
             </h1>
@@ -646,20 +647,22 @@ const Login = () => {
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={`app-scroll relative flex max-h-[90vh] w-full flex-col overflow-y-auto bg-white p-6 sm:p-8 md:p-12 lg:p-14 ${isLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
+          style={{ perspective: '1200px' }}
         >
           <AnimatePresence mode="wait">
             <motion.div
               key={isLogin ? 'login-form' : 'register-form'}
-              initial={{ clipPath: 'inset(50% 50% 50% 50%)', filter: 'blur(10px)' }}
-              animate={{ clipPath: 'inset(0% 0% 0% 0%)', filter: 'blur(0px)' }}
-              exit={{ clipPath: 'inset(50% 50% 50% 50%)', filter: 'blur(10px)' }}
-              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              initial={{ opacity: 0, rotateY: isLogin ? -90 : 90, scale: 0.8, z: -200, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, rotateY: 0, scale: 1, z: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, rotateY: isLogin ? 90 : -90, scale: 0.8, z: -200, filter: 'blur(8px)' }}
+              transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+              style={{ transformStyle: 'preserve-3d', transformOrigin: 'center center' }}
               className="my-auto w-full"
             >
               <div className="mb-9 flex flex-col items-center">
                 <img src={logo} alt="InsightED Logo" className="mb-5 h-20 w-auto object-contain drop-shadow-sm md:h-24" />
                 <p className="brand-kicker mb-2">{isForgot ? 'Account Recovery' : (isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`)}</p>
-                <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--ink)]">
+                <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--navy)]" style={{ fontFamily: 'var(--font-heading)' }}>
                   {isForgot ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
                 </h2>
                 <p className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
@@ -690,7 +693,7 @@ const Login = () => {
                       : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6)), KeyRound, '123456')}
 
                     <div className="flex justify-end mt-1">
-                      <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--brand-navy)] hover:text-[var(--brand-navy-deep)]">
+                      <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--navy)] hover:text-[var(--blue)]">
                         {loginMethod === 'password' ? 'Login via Passcode instead' : 'Login via Password instead'}
                       </button>
                     </div>
@@ -698,14 +701,14 @@ const Login = () => {
                     <div className="flex items-center justify-between pt-1">
                       <label className="flex items-center group cursor-pointer">
                         <div className="relative flex items-center justify-center w-4 h-4 mr-2">
-                          <input type="checkbox" className="peer appearance-none w-4 h-4 border-2 border-slate-300 rounded cursor-pointer checked:bg-[var(--brand-navy)] checked:border-[var(--brand-navy)] transition-all" />
+                          <input type="checkbox" className="peer appearance-none w-4 h-4 border-2 border-slate-300 rounded cursor-pointer checked:bg-[var(--navy)] checked:border-[var(--navy)] transition-all" />
                           <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 14 14" fill="none">
                             <path d="M3 8L6 11L11 3.5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor"></path>
                           </svg>
                         </div>
                         <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember device</span>
                       </label>
-                      <a href="#" onClick={toggleForgotMode} className="brand-focus text-sm font-bold text-[var(--brand-red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
+                      <a href="#" onClick={toggleForgotMode} className="brand-focus text-sm font-bold text-[var(--red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
                     </div>
                   </>
                 ) : (
@@ -804,7 +807,7 @@ const Login = () => {
               <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
                 <p className="text-sm font-medium text-slate-500">
                   {isForgot || isLogin ? 'Unauthorized access is strictly prohibited. ' : 'Already have an administrative account? '}
-                  <button onClick={toggleAuthMode} className="brand-focus font-bold text-[var(--brand-gold)] hover:text-amber-600 transition-colors">
+                  <button onClick={toggleAuthMode} className="brand-focus font-bold text-[var(--gold)] hover:text-amber-600 transition-colors">
                     {isForgot ? 'Back to Login' : (isLogin ? 'Request Authorization' : 'Secure Sign In')}
                   </button>
                 </p>

@@ -29,6 +29,7 @@ import {
 } from '../features/projects/utils/projectHelpers';
 import { formatCurrency } from '../shared/utils/formatters';
 import newLogo from '../assets/new_logo.png';
+import './Dashboard.css';
 
 const ProjectProcess = () => {
     const navigate = useNavigate();
@@ -84,11 +85,15 @@ const ProjectProcess = () => {
     };
 
     useEffect(() => {
+        document.body.classList.add('dashboard-body');
         const timer = setTimeout(() => {
             setPage(1);
             fetchProjects(1, searchQuery, statusFilter, schoolId, region, division);
         }, 500);
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            document.body.classList.remove('dashboard-body');
+        };
     }, [searchQuery, statusFilter, schoolId, region, division]);
 
     const handlePageChange = (newPage) => {
@@ -100,7 +105,7 @@ const ProjectProcess = () => {
     };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
+        <div className="flex h-screen overflow-hidden text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
             <Sidebar />
             <main id="project-scroll-area" className="flex-1 overflow-y-auto pb-32 relative app-scroll">
                 
@@ -126,8 +131,8 @@ const ProjectProcess = () => {
                                 <img src={newLogo} alt="Department of Education Logo" className="w-full h-full object-contain drop-shadow-sm" />
                             </div>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-sm">InsightED Infrastructure</h1>
-                                <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm">Project List</p>
+                                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-sm" style={{ fontFamily: 'var(--font-heading)' }}>InsightED Infrastructure</h1>
+                                <p className="text-[#A3C6E8] font-bold text-sm md:text-base mt-0.5 uppercase tracking-[0.15em] drop-shadow-sm" style={{ fontFamily: 'var(--font-body)' }}>Project List</p>
                             </div>
                         </motion.div>
 
@@ -137,8 +142,8 @@ const ProjectProcess = () => {
                             transition={{ duration: 0.4, delay: 0.1 }}
                             className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center min-w-[160px] shadow-lg"
                         >
-                            <p className="text-[#A3C6E8] text-[10px] font-black uppercase tracking-widest mb-1">Total Projects</p>
-                            <p className="text-3xl font-black text-white tracking-tight">{isLoading ? "..." : statusCounts.total.toLocaleString()}</p>
+                            <p className="text-[#A3C6E8] text-[10px] font-black uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-body)' }}>Total Projects</p>
+                            <p className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{isLoading ? "..." : statusCounts.total.toLocaleString()}</p>
                         </motion.div>
                     </div>
                 </div>
@@ -149,9 +154,9 @@ const ProjectProcess = () => {
                     {/* Project Statistics / Tranche Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {[
-                            { title: 'Tranche 1', count: statusCounts.tranche_1, color: 'bg-blue-500', text: 'text-blue-700', border: 'border-blue-100', filter: 'tranche_1' },
-                            { title: 'Tranche 2', count: statusCounts.tranche_2, color: 'bg-amber-500', text: 'text-amber-700', border: 'border-amber-100', filter: 'tranche_2' },
-                            { title: 'Tranche 3', count: statusCounts.tranche_3, color: 'bg-emerald-500', text: 'text-emerald-700', border: 'border-emerald-100', filter: 'tranche_3' },
+                            { title: 'Tranche 1', count: statusCounts.tranche_1, accent: 'blue', filter: 'tranche_1' },
+                            { title: 'Tranche 2', count: statusCounts.tranche_2, accent: 'gold', filter: 'tranche_2' },
+                            { title: 'Tranche 3', count: statusCounts.tranche_3, accent: 'red', filter: 'tranche_3' },
                         ].map((stat, idx) => {
                             const isSelected = statusFilter === stat.filter;
                             return (
@@ -162,16 +167,18 @@ const ProjectProcess = () => {
                                     transition={{ duration: 0.4, delay: 0.2 + (idx * 0.1) }}
                                     onClick={() => setStatusFilter(isSelected ? '' : stat.filter)}
                                     whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(0, 0, 0, 0.08)' }}
-                                    className={`bg-white rounded-2xl p-6 shadow-sm relative overflow-hidden transition-all duration-300 cursor-pointer ${isSelected ? 'border-2 ' + stat.border.replace('100', '400') + ' shadow-md' : 'border ' + stat.border}`}
+                                    className={`dashboard-card relative overflow-hidden transition-all duration-300 p-6 flex flex-col justify-between cursor-pointer ${isSelected ? 'ring-2 ring-[var(--gold)] shadow-md' : ''}`}
                                 >
-                                    <div className={`absolute top-0 left-0 w-1.5 h-full ${stat.color}`}></div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-2">Total Projects under</p>
-                                    <div className="flex justify-between items-end pl-2">
-                                        <h4 className={`text-lg font-black ${stat.text} tracking-tight`}>{stat.title}</h4>
-                                        <span className="text-4xl font-black text-slate-800 tracking-tight">{isLoading ? "..." : stat.count}</span>
+                                    <div className={`kpi-accent ${stat.accent} absolute left-0 top-6 bottom-6 w-1.5 rounded-r-md h-auto`}></div>
+                                    <div className="pl-3 w-full">
+                                        <p className="kpi-label mb-3">Total Projects under</p>
+                                        <div className="flex justify-between items-end">
+                                            <h4 className="text-lg font-black text-[var(--navy)] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{stat.title}</h4>
+                                            <span className="kpi-value">{isLoading ? "..." : stat.count}</span>
+                                        </div>
                                     </div>
                                     {isSelected && (
-                                        <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-current" style={{ color: stat.color.replace('bg-', '') }}></div>
+                                        <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[var(--gold)]"></div>
                                     )}
                                 </motion.div>
                             );
@@ -181,18 +188,19 @@ const ProjectProcess = () => {
                     {/* Search and Filters */}
                     <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
                         <div className="relative flex-1">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#0B3A68] focus:ring-1 focus:ring-[#0B3A68] transition-all"
+                                className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-bold text-[var(--navy)] focus:outline-none focus:border-[var(--blue)] focus:ring-1 focus:ring-[var(--blue)] transition-all"
                                 placeholder="Search projects by name or school..."
+                                style={{ fontFamily: 'var(--font-body)' }}
                             />
                         </div>
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${showFilters ? 'bg-[#0B3A68] text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                            className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${showFilters ? 'bg-[var(--blue)] text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'}`}
                         >
                             <Funnel className="w-4 h-4" />
                             Filter
@@ -208,15 +216,15 @@ const ProjectProcess = () => {
                                 exit={{ opacity: 0, height: 0, y: -10 }}
                                 className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4"
                             >
-                                <select value={region} onChange={(e) => setRegion(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]">
+                                <select value={region} onChange={(e) => setRegion(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-[var(--navy)] focus:outline-none focus:border-[var(--blue)]">
                                     <option value="">All Regions</option>
                                     {filterOptions.regions.map((item) => <option key={item} value={item}>{item}</option>)}
                                 </select>
-                                <select value={division} onChange={(e) => setDivision(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]">
+                                <select value={division} onChange={(e) => setDivision(e.target.value)} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-[var(--navy)] focus:outline-none focus:border-[var(--blue)]">
                                     <option value="">All Divisions</option>
                                     {filterOptions.divisions.map((item) => <option key={item} value={item}>{item}</option>)}
                                 </select>
-                                <input type="text" value={schoolId} onChange={(e) => setSchoolId(e.target.value)} placeholder="Filter by School ID" className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-slate-700 focus:outline-none focus:border-[#0B3A68]" />
+                                <input type="text" value={schoolId} onChange={(e) => setSchoolId(e.target.value)} placeholder="Filter by School ID" className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-bold text-[var(--navy)] focus:outline-none focus:border-[var(--blue)]" />
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -224,21 +232,21 @@ const ProjectProcess = () => {
                     {/* List of Projects */}
                     <div>
                         <div className="flex items-center justify-between mb-5">
-                            <h2 className="text-lg font-black text-slate-800 flex items-center gap-2.5 tracking-tight">
-                                <Layers className="w-5 h-5 text-[#0B3A68]" /> 
+                            <h2 className="text-lg font-black text-[var(--navy)] flex items-center gap-2.5 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                                <Layers className="w-5 h-5 text-[var(--blue)]" /> 
                                 List of Projects
                             </h2>
                             <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                                 <button
                                     onClick={() => setViewMode('card')}
-                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-[#0B3A68] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'card' ? 'bg-[var(--blue)] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                                     title="Card View"
                                 >
                                     <LayoutGrid className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('table')}
-                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-[#0B3A68] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${viewMode === 'table' ? 'bg-[var(--blue)] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                                     title="Table View"
                                 >
                                     <List className="w-4 h-4" />
@@ -255,7 +263,7 @@ const ProjectProcess = () => {
                         ) : projects.length === 0 ? (
                             <div className="bg-white rounded-2xl p-10 border border-slate-100 flex flex-col items-center justify-center text-center shadow-sm">
                                 <Search className="w-12 h-12 text-slate-300 mb-4" />
-                                <h3 className="text-lg font-black text-slate-800 mb-1">No Projects Found</h3>
+                                <h3 className="text-lg font-black text-slate-800 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>No Projects Found</h3>
                                 <p className="text-sm font-semibold text-slate-500">Adjust your search or filter parameters to find what you're looking for.</p>
                             </div>
                         ) : (
@@ -270,18 +278,18 @@ const ProjectProcess = () => {
                                                 exit={{ opacity: 0, scale: 0.98 }}
                                                 transition={{ duration: 0.3, delay: index * 0.05 }}
                                                 onClick={() => navigate(`/project-view/${encodeProjectId(project.project_id)}`)}
-                                                className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer relative flex flex-col group"
+                                                className="dashboard-card group relative flex flex-col p-6 md:p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer"
                                             >
                                                 {/* Top Line: Avatar and Badges */}
                                                 <div className="flex justify-between items-start mb-6">
-                                                    <div className="w-[60px] h-[60px] bg-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(59,130,246,0.12)] border border-slate-50 text-[#3b82f6] shrink-0">
+                                                    <div className="w-[60px] h-[60px] bg-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(7,89,133,0.12)] border border-[var(--blue-100)] text-[var(--blue)] shrink-0">
                                                         <Building2 className="w-7 h-7 stroke-[1.5]" />
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#fbbf24] text-white">
+                                                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[var(--gold)] text-white">
                                                             OIC
                                                         </span>
-                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'bg-red-50 text-red-600' : 'bg-[#ecfdf5] text-[#10b981]'}`}>
+                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'bg-red-50 text-[var(--red)]' : 'bg-[#ecfdf5] text-[#10b981]'}`}>
                                                             {project.is_eligible === false ? 'INACTIVE' : 'ACTIVE'}
                                                         </span>
                                                     </div>
@@ -289,24 +297,24 @@ const ProjectProcess = () => {
 
                                                 {/* Title and Subtitle */}
                                                 <div className="mb-8">
-                                                    <h3 className="text-[20px] font-black italic text-[#1e293b] tracking-tight leading-tight mb-2 group-hover:text-[#0B3A68] transition-colors line-clamp-2">
+                                                    <h3 className="text-[20px] font-black italic text-[var(--navy)] tracking-tight leading-tight mb-2 group-hover:text-[var(--blue)] transition-colors line-clamp-2" style={{ fontFamily: 'var(--font-heading)' }}>
                                                         [ STAGING ] {getProjectTitle(project).toUpperCase()}
                                                     </h3>
-                                                    <div className="text-[10px] font-black text-[#0B3A68] uppercase tracking-widest flex items-center gap-1.5">
+                                                    <div className="text-[10px] font-black text-[var(--blue)] uppercase tracking-widest flex items-center gap-1.5">
                                                         <span className="truncate">{project.school_name?.toUpperCase() || 'ASSISTANT SCHOOLS DIVISION SUPERINTENDENT'}</span>
-                                                        <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                                                        <Clock className="w-3 h-3 text-[var(--muted)] shrink-0" />
                                                     </div>
                                                 </div>
 
                                                 {/* Key-Values */}
                                                 <div className="space-y-4 mb-8">
                                                     <div className="flex justify-between items-center">
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">STRAND</span>
-                                                        <span className="text-[11px] font-black text-[#1e293b] text-right">{project.region || 'Region VII'}</span>
+                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest">STRAND</span>
+                                                        <span className="text-[11px] font-black text-[var(--navy)] text-right">{project.region || 'Region VII'}</span>
                                                     </div>
                                                     <div className="flex justify-between items-center">
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">OFFICE</span>
-                                                        <span className="text-[11px] font-black text-[#1e293b] text-right">{project.division || 'Regional Office'}</span>
+                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest">OFFICE</span>
+                                                        <span className="text-[11px] font-black text-[var(--navy)] text-right">{project.division || 'Regional Office'}</span>
                                                     </div>
                                                 </div>
 
@@ -316,7 +324,7 @@ const ProjectProcess = () => {
                                                         <Layers className="w-3 h-3" />
                                                         REASSIGN
                                                     </div>
-                                                    <div className="bg-[#fef2f2] text-[#ef4444] px-3 py-1.5 rounded-md flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
+                                                    <div className="bg-red-50 text-[var(--red)] px-3 py-1.5 rounded-md flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest">
                                                         <Clock className="w-3 h-3" />
                                                         VACATE
                                                     </div>
@@ -328,10 +336,10 @@ const ProjectProcess = () => {
 
                                                 {/* Footer */}
                                                 <div className="flex items-center justify-between pt-0 mt-auto">
-                                                    <span className="text-[10px] font-black italic text-slate-300 uppercase tracking-widest group-hover:text-[#0B3A68] transition-colors flex items-center gap-1.5">
+                                                    <span className="text-[10px] font-black italic text-slate-300 uppercase tracking-widest group-hover:text-[var(--blue)] transition-colors flex items-center gap-1.5">
                                                         FULL PROFILE <ArrowRight className="w-3 h-3" />
                                                     </span>
-                                                    <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-slate-400 group-hover:bg-slate-100 transition-colors">
+                                                    <div className="w-8 h-8 rounded-full bg-[var(--blue-50)] flex items-center justify-center text-[var(--muted)] group-hover:bg-[var(--blue-100)] transition-colors">
                                                         <Clock className="w-3.5 h-3.5" />
                                                     </div>
                                                 </div>
@@ -346,7 +354,7 @@ const ProjectProcess = () => {
                                         >
                                             <table className="w-full text-left border-collapse whitespace-nowrap min-w-[900px]">
                                                 <thead>
-                                                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                    <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-[var(--muted)] uppercase tracking-widest">
                                                         <th className="px-5 py-4">Project Details</th>
                                                         <th className="px-5 py-4">Location & District</th>
                                                         <th className="px-5 py-4 text-center">Status</th>
@@ -367,7 +375,7 @@ const ProjectProcess = () => {
                                                                         <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${project.project_category && project.project_category.toLowerCase() === 'new' ? 'bg-[#FFF8EB] border-[#FDE1AC] text-[#D97706] border' : getStatusStyle(project.project_category)}`}>
                                                                             {project.project_category || 'New'}
                                                                         </span>
-                                                                        <span className="font-black text-[#0B3A68] text-sm group-hover:text-[#154b82] transition-colors truncate">{getProjectTitle(project)}</span>
+                                                                        <span className="font-black text-[var(--navy)] text-sm group-hover:text-[var(--blue)] transition-colors truncate" style={{ fontFamily: 'var(--font-heading)' }}>{getProjectTitle(project)}</span>
                                                                     </div>
                                                                     <div className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5">
                                                                         <span className="truncate">{project.school_name || 'Maniwaya Elementary School'}</span>
@@ -378,22 +386,22 @@ const ProjectProcess = () => {
                                                             </td>
                                                             <td className="px-5 py-4">
                                                                 <div className="flex flex-col gap-1">
-                                                                    <span className="text-[11px] font-bold text-slate-700">{project.region || 'Region'} | {project.division || 'Division'}</span>
-                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{project.municipality || 'Municipality'} | {project.district || 'District'}</span>
+                                                                    <span className="text-[11px] font-bold text-[var(--navy)]">{project.region || 'Region'} | {project.division || 'Division'}</span>
+                                                                    <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">{project.municipality || 'Municipality'} | {project.district || 'District'}</span>
                                                                 </div>
                                                             </td>
                                                             <td className="px-5 py-4 text-center">
-                                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+                                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${project.is_eligible === false ? 'border-red-200 bg-red-50 text-[var(--red)]' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
                                                                     {project.is_eligible === false ? 'Not Eligible' : 'Eligible'}
                                                                 </span>
                                                             </td>
                                                             <td className="px-5 py-4 text-right">
-                                                                <div className="font-black text-sm text-slate-800">{formatCurrency(project.contract_amount)}</div>
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Released: {formatCurrency(project.approved_budget_for_contract)}</div>
+                                                                <div className="font-black text-sm text-[var(--navy)]">{formatCurrency(project.contract_amount)}</div>
+                                                                <div className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mt-0.5">Released: {formatCurrency(project.approved_budget_for_contract)}</div>
                                                             </td>
                                                             <td className="px-5 py-4 text-right">
-                                                                <div className="font-black text-sm text-[#0B3A68]">{formatCurrency(getLatestTrancheAmount(project))}</div>
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{project.latest_tranche_status || getLatestTrancheStatus(project)}</div>
+                                                                <div className="font-black text-sm text-[var(--blue)]">{formatCurrency(getLatestTrancheAmount(project))}</div>
+                                                                <div className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mt-0.5">{project.latest_tranche_status || getLatestTrancheStatus(project)}</div>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -413,7 +421,7 @@ const ProjectProcess = () => {
                             className="bg-white border border-slate-200 shadow-sm mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl px-5 py-4 sm:flex-row"
                         >
                             <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                                Showing <span className="text-[#0B3A68]">{((page - 1) * limit) + 1}</span> to <span className="text-[#0B3A68]">{Math.min(page * limit, totalItems)}</span> of <span className="text-[#0B3A68]">{totalItems}</span> projects
+                                Showing <span className="text-[var(--blue)]">{((page - 1) * limit) + 1}</span> to <span className="text-[var(--blue)]">{Math.min(page * limit, totalItems)}</span> of <span className="text-[var(--blue)]">{totalItems}</span> projects
                             </p>
                             <div className="flex items-center gap-3">
                                 <button
@@ -423,7 +431,7 @@ const ProjectProcess = () => {
                                 >
                                     <ChevronLeft className="h-5 w-5" />
                                 </button>
-                                <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Page {page} of {totalPages}</span>
+                                <span className="text-[11px] font-black text-[var(--navy)] uppercase tracking-widest">Page {page} of {totalPages}</span>
                                 <button
                                     onClick={() => handlePageChange(page + 1)}
                                     disabled={page === totalPages}
@@ -438,25 +446,25 @@ const ProjectProcess = () => {
             </main>
 
             {/* Mobile Bottom Navigation Bar */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-6 py-3 pb-safe">
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-[var(--line)] shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-6 py-3 pb-safe">
                 <div className="flex items-center justify-between max-w-sm mx-auto">
-                    <Link to="/" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
-                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                    <Link to="/home" className="flex flex-col items-center gap-1 text-[var(--muted)] hover:text-[var(--blue)] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-[var(--blue-50)]">
                             <HomeIcon className="w-6 h-6" />
                         </div>
-                        <span className="text-[11px] font-bold tracking-tight">Home</span>
+                        <span className="text-[11px] font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Home</span>
                     </Link>
-                    <Link to="/projects-list" className="flex flex-col items-center gap-1 text-[#0B3A68]">
-                        <div className="bg-[#EBF2F9] p-2.5 rounded-2xl shadow-sm border border-[#0B3A68]/10">
+                    <Link to="/projects-list" className="flex flex-col items-center gap-1 text-[var(--blue)]">
+                        <div className="bg-[var(--blue-50)] p-2.5 rounded-2xl shadow-sm border border-[var(--blue-100)]">
                             <FolderKanban className="w-6 h-6 fill-current" />
                         </div>
-                        <span className="text-[11px] font-black tracking-tight">Projects</span>
+                        <span className="text-[11px] font-black tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Projects</span>
                     </Link>
-                    <Link to="/profile" className="flex flex-col items-center gap-1 text-slate-400 hover:text-[#0B3A68] transition-colors">
-                        <div className="p-2.5 rounded-2xl hover:bg-slate-50">
+                    <Link to="/profile" className="flex flex-col items-center gap-1 text-[var(--muted)] hover:text-[var(--blue)] transition-colors">
+                        <div className="p-2.5 rounded-2xl hover:bg-[var(--blue-50)]">
                             <Settings className="w-6 h-6" />
                         </div>
-                        <span className="text-[11px] font-bold tracking-tight">Settings</span>
+                        <span className="text-[11px] font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Settings</span>
                     </Link>
                 </div>
             </nav>
@@ -465,4 +473,3 @@ const ProjectProcess = () => {
 };
 
 export default ProjectProcess;
-
