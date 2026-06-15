@@ -259,6 +259,7 @@ body.dashboard-body {
 .dashboard-card .kpi-accent.blue { background: var(--blue); }
 .dashboard-card .kpi-accent.gold { background: var(--gold); }
 .dashboard-card .kpi-accent.red { background: var(--red); }
+.dashboard-card .kpi-accent.slate { background: var(--muted); }
 
 .kpi-content {
   display: flex;
