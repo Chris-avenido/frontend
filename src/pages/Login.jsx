@@ -27,13 +27,39 @@ const textPageVariants = {
     transformOrigin: "left center",
     backfaceVisibility: "hidden",
     filter: 'blur(0px)',
-    transition: { duration: 1.0, ease: [0.25, 1, 0.5, 1] }
+    transition: { 
+      duration: 1.0, 
+      ease: [0.25, 1, 0.5, 1],
+      staggerChildren: 0.1
+    }
   },
   exit: (direction) => ({
     rotateY: direction > 0 ? -180 : 180,
     transformOrigin: "left center",
     backfaceVisibility: "hidden",
     filter: 'blur(8px)',
+    transition: { 
+      duration: 1.0, 
+      ease: [0.25, 1, 0.5, 1],
+      staggerChildren: 0.1,
+      staggerDirection: -1
+    }
+  })
+};
+
+const textElementVariants = {
+  initial: (customIndex) => ({
+    opacity: 0,
+    x: customIndex % 2 !== 0 ? -50 : 50,
+  }),
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 1.0, ease: [0.25, 1, 0.5, 1] }
+  },
+  exit: (customIndex) => ({
+    opacity: 0,
+    x: customIndex % 2 !== 0 ? -50 : 50,
     transition: { duration: 1.0, ease: [0.25, 1, 0.5, 1] }
   })
 };
@@ -700,22 +726,22 @@ const Login = () => {
                 style={{ transformStyle: 'preserve-3d', position: 'absolute', top: 0, left: 0, width: '100%', backfaceVisibility: 'hidden' }}
                 className="space-y-6"
               >
-                <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                <motion.h1 custom={1} variants={textElementVariants} className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
                   {isLogin ? 'Academic' : 'Join the'} <br />
                   <span className="text-[var(--gold)]">
                     {isLogin ? 'Finance Portal' : 'Insight Network'}
                   </span>
-                </h1>
-                <p className="text-blue-100/85 text-lg max-w-md font-medium leading-relaxed">
+                </motion.h1>
+                <motion.p custom={2} variants={textElementVariants} className="text-blue-100/85 text-lg max-w-md font-medium leading-relaxed">
                   {isLogin
                     ? 'A trusted workspace for monitoring school infrastructure funding, progress, and accountability.'
                     : 'Secure your administrative access to monitor and manage departmental resource allocation.'}
-                </p>
+                </motion.p>
                 <div className="grid grid-cols-2 gap-3 pt-2">
-                  {['Transparent', 'Academic', 'Secure', 'Insightful'].map((item) => (
-                    <div key={item} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/90 backdrop-blur">
+                  {['Transparent', 'Academic', 'Secure', 'Insightful'].map((item, index) => (
+                    <motion.div custom={index + 3} variants={textElementVariants} key={item} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/90 backdrop-blur">
                       {item}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
