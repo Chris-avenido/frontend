@@ -108,7 +108,7 @@ const ProjectProcess = () => {
         <div className="flex h-screen overflow-hidden text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
             <Sidebar />
             <main id="project-scroll-area" className="flex-1 overflow-y-auto pb-32 relative app-scroll">
-                
+
                 {/* Header Section */}
                 <div className="bg-gradient-to-br from-[#0B3A68] to-[#154b82] pt-12 pb-24 px-6 md:px-12 relative overflow-hidden shadow-md">
                     {/* Subtle background pattern */}
@@ -119,9 +119,9 @@ const ProjectProcess = () => {
                             <circle cx="50" cy="50" r="30" fill="currentColor" />
                         </svg>
                     </div>
-                    
+
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 max-w-7xl mx-auto">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -136,7 +136,7 @@ const ProjectProcess = () => {
                             </div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.4, delay: 0.1 }}
@@ -150,7 +150,7 @@ const ProjectProcess = () => {
 
                 {/* Main Content Dashboard */}
                 <div className="max-w-7xl mx-auto px-5 md:px-12 -mt-12 relative z-20 space-y-8">
-                    
+
                     {/* Project Statistics / Tranche Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {[
@@ -160,7 +160,7 @@ const ProjectProcess = () => {
                         ].map((stat, idx) => {
                             const isSelected = statusFilter === stat.filter;
                             return (
-                                <motion.div 
+                                <motion.div
                                     key={stat.title}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -233,7 +233,7 @@ const ProjectProcess = () => {
                     <div>
                         <div className="flex items-center justify-between mb-5">
                             <h2 className="text-lg font-black text-[var(--navy)] flex items-center gap-2.5 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-                                <Layers className="w-5 h-5 text-[var(--blue)]" /> 
+                                <Layers className="w-5 h-5 text-[var(--blue)]" />
                                 List of Projects
                             </h2>
                             <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
@@ -281,7 +281,8 @@ const ProjectProcess = () => {
                                                 className="dashboard-card group relative flex flex-col p-6 md:p-8 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer"
                                             >
                                                 {/* Top Line: Avatar and Badges */}
-                                                <div className="flex justify-between items-start mb-6">
+                                                {/* Top Line: Avatar and Badges */}
+                                                <div className="flex justify-between items-start mb-6 w-full">
                                                     <div className="w-[60px] h-[60px] bg-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(7,89,133,0.12)] border border-[var(--blue-100)] text-[var(--blue)] shrink-0">
                                                         <Building2 className="w-7 h-7 stroke-[1.5]" />
                                                     </div>
@@ -307,14 +308,14 @@ const ProjectProcess = () => {
                                                 </div>
 
                                                 {/* Key-Values */}
-                                                <div className="space-y-4 mb-8">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest">STRAND</span>
-                                                        <span className="text-[11px] font-black text-[var(--navy)] text-right">{project.region || 'Region VII'}</span>
+                                                <div className="space-y-4 mb-8 w-full">
+                                                    <div className="flex justify-between items-center w-full">
+                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest shrink-0">STRAND</span>
+                                                        <span className="text-[11px] font-bold text-[var(--navy)] text-right ml-4">{project.region || 'Region VII'}</span>
                                                     </div>
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest">OFFICE</span>
-                                                        <span className="text-[11px] font-black text-[var(--navy)] text-right">{project.division || 'Regional Office'}</span>
+                                                    <div className="flex justify-between items-center w-full">
+                                                        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-widest shrink-0">OFFICE</span>
+                                                        <span className="text-[11px] font-bold text-[var(--navy)] text-right ml-4">{project.division || 'Regional Office'}</span>
                                                     </div>
                                                 </div>
 
