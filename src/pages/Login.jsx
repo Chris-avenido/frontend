@@ -15,9 +15,79 @@ import {
   getRegions
 } from '../utils/philippinesAddress';
 
+const textPageVariants = {
+  initial: (direction) => ({
+    rotateY: direction > 0 ? 180 : -180,
+    transformOrigin: "left center",
+    backfaceVisibility: "hidden",
+    filter: 'blur(8px)',
+  }),
+  animate: {
+    rotateY: 0,
+    transformOrigin: "left center",
+    backfaceVisibility: "hidden",
+    filter: 'blur(0px)',
+    transition: { duration: 1.0, ease: [0.25, 1, 0.5, 1] }
+  },
+  exit: (direction) => ({
+    rotateY: direction > 0 ? -180 : 180,
+    transformOrigin: "left center",
+    backfaceVisibility: "hidden",
+    filter: 'blur(8px)',
+    transition: { duration: 1.0, ease: [0.25, 1, 0.5, 1] }
+  })
+};
+
+const pageVariants = {
+  initial: (direction) => ({
+    opacity: 0,
+    rotateY: direction > 0 ? 90 : -90,
+    z: -300,
+    transformOrigin: direction > 0 ? "right center" : "left center",
+    filter: 'blur(8px)',
+    boxShadow: "inset 0 0 50px rgba(0,0,0,0.3)"
+  }),
+  animate: {
+    opacity: 1,
+    rotateY: 0,
+    z: 0,
+    filter: 'blur(0px)',
+    boxShadow: "inset 0 0 0px rgba(0,0,0,0)",
+    transition: {
+      delay: 0.6,
+      duration: 0.8,
+      ease: [0.25, 1, 0.5, 1],
+      when: "beforeChildren",
+      staggerChildren: 0.08
+    }
+  },
+  exit: (direction) => ({
+    opacity: 0,
+    rotateY: direction > 0 ? -90 : 90,
+    z: -300,
+    transformOrigin: direction > 0 ? "left center" : "right center",
+    filter: 'blur(8px)',
+    boxShadow: "inset 0 0 50px rgba(0,0,0,0.3)",
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 1, 0.5, 1],
+      when: "afterChildren",
+      staggerChildren: 0.05,
+      staggerDirection: -1
+    }
+  })
+};
+
+const childVariants = {
+  initial: { opacity: 0, rotateY: 90, scale: 0.95, transformOrigin: "left center", filter: 'blur(4px)' },
+  animate: { opacity: 1, rotateY: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] } },
+  exit: { opacity: 0, rotateY: -90, scale: 0.95, transformOrigin: "left center", filter: 'blur(4px)', transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [layoutIsLogin, setLayoutIsLogin] = useState(true);
   const [isForgot, setIsForgot] = useState(false);
   const [forgotStep, setForgotStep] = useState(1);
   const [resetToken, setResetToken] = useState(null);
@@ -501,7 +571,7 @@ const Login = () => {
   const renderSelect = (id, label, value, onChange, icon, options, isReg = false, disabled = false) => {
     const Icon = icon;
     return (
-      <div className="space-y-1.5 w-full">
+      <motion.div variants={childVariants} className="space-y-1.5 w-full">
         <label htmlFor={id} className="block text-xs font-extrabold text-[var(--muted)] uppercase tracking-wider ml-1">
           {label}
         </label>
@@ -530,7 +600,7 @@ const Login = () => {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -556,7 +626,7 @@ const Login = () => {
     }
 
     return (
-      <div className="space-y-1.5 w-full">
+      <motion.div variants={childVariants} className="space-y-1.5 w-full">
         <label htmlFor={id} className="block text-xs font-extrabold text-[var(--muted)] uppercase tracking-wider ml-1">
           {label}
         </label>
@@ -587,23 +657,23 @@ const Login = () => {
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
     );
   };
 
   return (
-    <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden py-8 sm:py-10 text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
+    <div className="app-shell relative flex min-h-screen items-center justify-center overflow-hidden py-4 sm:py-6 text-[var(--text)]" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="absolute inset-0 z-0 opacity-80">
         <div className="absolute left-[-12%] top-[-24%] h-[760px] w-[760px] rounded-full bg-[#08315F]/10 blur-[110px]" />
         <div className="absolute bottom-[-22%] right-[-12%] h-[600px] w-[600px] rounded-full bg-[#FBBF24]/20 blur-[95px]" />
       </div>
 
-      <div className={`w-full ${isLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[2.5rem] bg-white/90 backdrop-blur-xl shadow-2xl border border-white/60 transition-all duration-500 ease-in-out ${isLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+      <div className={`w-full ${layoutIsLogin ? 'max-w-[1040px]' : 'max-w-[1220px]'} min-h-[600px] lg:min-h-[680px] relative z-10 mx-4 flex flex-col items-stretch overflow-hidden rounded-[2.5rem] bg-white/90 backdrop-blur-xl shadow-2xl border border-white/60 transition-all duration-500 ease-in-out ${layoutIsLogin ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
 
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`academic-grid hidden md:flex ${isLogin ? 'md:w-1/2' : 'md:w-1/3'} relative flex-col justify-between overflow-hidden bg-[var(--navy)] p-12 text-white`}
+          className={`academic-grid hidden md:flex ${layoutIsLogin ? 'md:w-1/2' : 'md:w-1/3'} relative flex-col justify-between overflow-hidden bg-[var(--navy)] p-12 text-white`}
         >
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#FBBF24]/24 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 h-1.5 w-full bg-[var(--gold)]"></div>
@@ -618,25 +688,38 @@ const Login = () => {
               </div>
             </motion.div>
           </div>
-          <motion.div layout className="relative z-10 space-y-6">
-            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              {isLogin ? 'Academic' : 'Join the'} <br />
-              <span className="text-[var(--gold)]">
-                {isLogin ? 'Finance Portal' : 'Insight Network'}
-              </span>
-            </h1>
-            <p className="text-blue-100/85 text-lg max-w-md font-medium leading-relaxed">
-              {isLogin
-                ? 'A trusted workspace for monitoring school infrastructure funding, progress, and accountability.'
-                : 'Secure your administrative access to monitor and manage departmental resource allocation.'}
-            </p>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {['Transparent', 'Academic', 'Secure', 'Insightful'].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/90 backdrop-blur">
-                  {item}
+          <motion.div layout className="relative z-10 flex-1 my-12 w-full" style={{ perspective: '1200px' }}>
+            <AnimatePresence custom={isLogin ? 1 : -1}>
+              <motion.div
+                key={isLogin ? 'login-copy' : 'register-copy'}
+                custom={isLogin ? 1 : -1}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={textPageVariants}
+                style={{ transformStyle: 'preserve-3d', position: 'absolute', top: 0, left: 0, width: '100%', backfaceVisibility: 'hidden' }}
+                className="space-y-6"
+              >
+                <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                  {isLogin ? 'Academic' : 'Join the'} <br />
+                  <span className="text-[var(--gold)]">
+                    {isLogin ? 'Finance Portal' : 'Insight Network'}
+                  </span>
+                </h1>
+                <p className="text-blue-100/85 text-lg max-w-md font-medium leading-relaxed">
+                  {isLogin
+                    ? 'A trusted workspace for monitoring school infrastructure funding, progress, and accountability.'
+                    : 'Secure your administrative access to monitor and manage departmental resource allocation.'}
+                </p>
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  {['Transparent', 'Academic', 'Secure', 'Insightful'].map((item) => (
+                    <div key={item} className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white/90 backdrop-blur">
+                      {item}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
           <div className="relative z-10 text-xs text-blue-100/60 uppercase tracking-widest font-semibold">
             (c) 2026 Department of Education
@@ -646,33 +729,34 @@ const Login = () => {
         <motion.div
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`app-scroll relative flex max-h-[90vh] w-full flex-col overflow-y-auto bg-white p-6 sm:p-8 md:p-12 lg:p-14 ${isLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
+          className={`relative flex w-full flex-col bg-white p-6 md:p-8 lg:p-10 ${layoutIsLogin ? 'md:w-1/2' : 'md:w-2/3'}`}
           style={{ perspective: '1200px' }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={isLogin ? 1 : -1} onExitComplete={() => setLayoutIsLogin(isLogin)}>
             <motion.div
-              key={isLogin ? 'login-form' : 'register-form'}
-              initial={{ opacity: 0, rotateY: isLogin ? -90 : 90, scale: 0.8, z: -200, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, rotateY: 0, scale: 1, z: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, rotateY: isLogin ? 90 : -90, scale: 0.8, z: -200, filter: 'blur(8px)' }}
-              transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-              style={{ transformStyle: 'preserve-3d', transformOrigin: 'center center' }}
+              key={isForgot ? 'forgot-form' : (isLogin ? 'login-form' : `register-form-${currentStep}`)}
+              custom={isLogin ? 1 : -1}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              style={{ transformStyle: 'preserve-3d' }}
               className="my-auto w-full"
             >
-              <div className="mb-9 flex flex-col items-center">
-                <img src={logo} alt="InsightED Logo" className="mb-5 h-20 w-auto object-contain drop-shadow-sm md:h-24" />
-                <p className="brand-kicker mb-2">{isForgot ? 'Account Recovery' : (isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`)}</p>
-                <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--navy)]" style={{ fontFamily: 'var(--font-heading)' }}>
+              <div className="mb-4 flex flex-col items-center">
+                <motion.img variants={childVariants} src={logo} alt="InsightED Logo" className="mb-2 h-14 w-auto object-contain drop-shadow-sm md:h-16" />
+                <motion.p variants={childVariants} className="brand-kicker mb-2">{isForgot ? 'Account Recovery' : (isLogin ? 'Secure Access' : `Account Setup - Step ${currentStep} of 4`)}</motion.p>
+                <motion.h2 variants={childVariants} className="text-center text-3xl font-extrabold tracking-tight text-[var(--navy)]" style={{ fontFamily: 'var(--font-heading)' }}>
                   {isForgot ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
-                </h2>
-                <p className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
+                </motion.h2>
+                <motion.p variants={childVariants} className="mt-2 max-w-md text-center text-sm font-medium leading-6 text-[var(--muted)]">
                   {isForgot
                     ? (forgotStep === 1 ? 'Enter your email address to receive a verification code.' : 'Enter the 6-digit code sent to your email and your new password.')
                     : (isLogin ? 'Please authenticate your administrative account.' : 'Register your details to request system access. Ensure all information is accurate.')}
-                </p>
+                </motion.p>
               </div>
 
-              <form className="space-y-5" onSubmit={handleAuthSubmit} noValidate>
+              <form className="space-y-3" onSubmit={handleAuthSubmit} noValidate>
                 {isForgot ? (
                   forgotStep === 1 ? (
                     <>
@@ -692,13 +776,13 @@ const Login = () => {
                       ? renderInput('password', 'Password', 'password', password, (e) => setPassword(e.target.value), Lock, '********')
                       : renderInput('password', '6-Digit Passcode', 'password', password, (e) => setPassword(e.target.value.replace(/\D/g, '').slice(0, 6)), KeyRound, '123456')}
 
-                    <div className="flex justify-end mt-1">
+                    <motion.div variants={childVariants} className="flex justify-end mt-1">
                       <button type="button" onClick={() => setLoginMethod(prev => prev === 'password' ? 'passcode' : 'password')} className="brand-focus text-xs font-bold text-[var(--navy)] hover:text-[var(--blue)]">
                         {loginMethod === 'password' ? 'Login via Passcode instead' : 'Login via Password instead'}
                       </button>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex items-center justify-between pt-1">
+                    <motion.div variants={childVariants} className="flex items-center justify-between pt-1">
                       <label className="flex items-center group cursor-pointer">
                         <div className="relative flex items-center justify-center w-4 h-4 mr-2">
                           <input type="checkbox" className="peer appearance-none w-4 h-4 border-2 border-slate-300 rounded cursor-pointer checked:bg-[var(--navy)] checked:border-[var(--navy)] transition-all" />
@@ -709,15 +793,15 @@ const Login = () => {
                         <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember device</span>
                       </label>
                       <a href="#" onClick={toggleForgotMode} className="brand-focus text-sm font-bold text-[var(--red)] hover:text-red-700 transition-colors">Forgot credentials?</a>
-                    </div>
+                    </motion.div>
                   </>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {currentStep === 1 && (
                       <>
-                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                        <motion.div variants={childVariants} className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="brand-kicker">Step 1: Personal Information</h3>
-                        </div>
+                        </motion.div>
                         {renderInput('first_name', 'First Name', 'text', regData.first_name, handleRegChange, User, 'Juan', true)}
                         {renderInput('last_name', 'Last Name', 'text', regData.last_name, handleRegChange, User, 'Dela Cruz', true)}
                         {renderInput('email', 'Email Address', 'email', regData.email, handleRegChange, Mail, 'juan@deped.gov.ph', true)}
@@ -727,9 +811,9 @@ const Login = () => {
 
                     {currentStep === 2 && (
                       <>
-                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                        <motion.div variants={childVariants} className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="brand-kicker">Step 2: Location</h3>
-                        </div>
+                        </motion.div>
                         {renderSelect('region', 'Region', addressCodes.region, handleRegionChange, MapPin, addressOptions.regions, true, isAddressLoading)}
                         {renderInput('division', 'Division', 'text', regData.division, handleRegChange, Building2, 'ENTER DIVISION', true)}
                         {renderSelect('province', 'Province', addressCodes.province, handleProvinceChange, MapPin, addressOptions.provinces, true, !addressCodes.region || isAddressLoading || addressOptions.provinces.length === 0)}
@@ -739,9 +823,9 @@ const Login = () => {
 
                     {currentStep === 3 && (
                       <>
-                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                        <motion.div variants={childVariants} className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="brand-kicker">Step 3: Role & Assignment</h3>
-                        </div>
+                        </motion.div>
                         {renderSelect('barangay', 'Barangay', addressCodes.barangay, handleBarangayChange, MapPin, addressOptions.barangays, true, !addressCodes.city || isAddressLoading)}
                         {renderSelect('office', 'Office / Role', regData.office, handleRegChange, Building2, ['Finance'], true)}
                         {renderSelect('position', 'Position', regData.position, handleRegChange, Briefcase, ['Accountant I', 'Accountant II', 'Accountant III', 'Admin Officer'], true)}
@@ -750,9 +834,9 @@ const Login = () => {
 
                     {currentStep === 4 && (
                       <>
-                        <div className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
+                        <motion.div variants={childVariants} className="col-span-1 md:col-span-2 border-b border-slate-100 pb-2 mb-2">
                           <h3 className="brand-kicker">Step 4: Security</h3>
-                        </div>
+                        </motion.div>
                         {renderInput('password', 'Password', 'password', regData.password, handleRegChange, Lock, '********', true)}
                         {renderInput('confirm_password', 'Confirm Password', 'password', regData.confirm_password, handleRegChange, Lock, '********', true)}
                         {renderInput('passcode', '6-Digit Passcode', 'password', regData.passcode, handleRegChange, KeyRound, '123456', true)}
@@ -762,7 +846,7 @@ const Login = () => {
                   </div>
                 )}
 
-                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
+                <motion.div variants={childVariants} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
                   {isForgot ? (
                     <button type="submit" disabled={isLoading} className="brand-button-primary brand-focus group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-4 text-sm font-extrabold disabled:opacity-70">
                       <span className="relative z-10">{forgotStep === 1 ? 'Send Reset Code' : 'Verify & Reset Password'}</span>
@@ -804,14 +888,14 @@ const Login = () => {
                 </motion.div>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
+              <motion.div variants={childVariants} className="mt-4 pt-4 border-t border-slate-100 flex justify-center">
                 <p className="text-sm font-medium text-slate-500">
                   {isForgot || isLogin ? 'Unauthorized access is strictly prohibited. ' : 'Already have an administrative account? '}
                   <button onClick={toggleAuthMode} className="brand-focus font-bold text-[var(--gold)] hover:text-amber-600 transition-colors">
                     {isForgot ? 'Back to Login' : (isLogin ? 'Request Authorization' : 'Secure Sign In')}
                   </button>
                 </p>
-              </div>
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </motion.div>
